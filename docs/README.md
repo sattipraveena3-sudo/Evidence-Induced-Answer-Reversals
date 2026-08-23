@@ -1,0 +1,1 @@
+Documentation for the EAR research workflow. See `experiment_status.md`, `hotpotqa_source.md`, `result_contract.md`, and `reproducibility.md`.
