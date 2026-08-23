@@ -1,9 +1,12 @@
 from __future__ import annotations
-import argparse, json, math, random, re, urllib.request
+import argparse, json, random, re, urllib.request
 from pathlib import Path
 from collections import Counter
 
-URL = 'http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_dev_distractor_v1.json'
+SOURCES = [
+    'http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_dev_distractor_v1.json',
+    'https://huggingface.co/datasets/namlh2004/hotpotqa/resolve/main/hotpot_dev_distractor_v1.json?download=true',
+]
 
 
 def tok(s: str):
@@ -24,6 +27,23 @@ def lexical_rank(question: str, paragraphs: list[tuple[str,list[str]]]):
     return [x[2] for x in scored]
 
 
+def download_dataset():
+    last_error = None
+    for url in SOURCES:
+        try:
+            print(f'Downloading HotpotQA from {url}')
+            req = urllib.request.Request(url, headers={'User-Agent':'ear-rag-research/0.1'})
+            with urllib.request.urlopen(req, timeout=240) as r:
+                payload = r.read()
+            data = json.loads(payload.decode('utf-8'))
+            print(f'Downloaded {len(data)} HotpotQA examples')
+            return data
+        except Exception as exc:
+            print(f'HotpotQA source failed: {exc}')
+            last_error = exc
+    raise RuntimeError(f'All HotpotQA download sources failed: {last_error}')
+
+
 def main():
     ap=argparse.ArgumentParser()
     ap.add_argument('--output', default='data/primary.jsonl')
@@ -31,10 +51,7 @@ def main():
     ap.add_argument('--seed', type=int, default=7)
     args=ap.parse_args()
 
-    print('Downloading official HotpotQA distractor dev set...')
-    with urllib.request.urlopen(URL, timeout=180) as r:
-        data=json.loads(r.read().decode('utf-8'))
-
+    data=download_dataset()
     rng=random.Random(args.seed)
     rng.shuffle(data)
     data=data[:args.limit]
