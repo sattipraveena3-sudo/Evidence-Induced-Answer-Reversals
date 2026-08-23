@@ -10,7 +10,12 @@ on:
       limit:
         description: Number of questions
         required: true
-        default: '500'
+        default: '100'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/prepare_hotpotqa.py'
+      - '.github/workflows/primary-experiment.yml'
 
 jobs:
   run:
@@ -22,13 +27,13 @@ jobs:
         with:
           python-version: '3.11'
       - run: python -m pip install -e '.[plots]'
-      - name: Require primary dataset
-        run: test -f data/primary.jsonl || (echo 'Add data/primary.jsonl before running the primary experiment' && exit 1)
-      - name: Generate trajectories
+      - name: Prepare official HotpotQA pilot set
+        run: python scripts/prepare_hotpotqa.py --output data/primary.jsonl --limit '${{ inputs.limit || 100 }}' --seed 7
+      - name: Generate real Top-k trajectories
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          ear-run --input data/primary.jsonl --output results/primary_trajectories.jsonl --backend openai --model '${{ inputs.model }}' --depths 1,2,3,5,10 --limit '${{ inputs.limit }}'
+          ear-run --input data/primary.jsonl --output results/primary_trajectories.jsonl --backend openai --model '${{ inputs.model || 'gpt-4.1-mini' }}' --depths 1,2,3,5,10 --limit '${{ inputs.limit || 100 }}'
       - name: Analyze EAR results
         run: ear-analyze --input results/primary_trajectories.jsonl --outdir results/primary --plots
       - uses: actions/upload-artifact@v4
