@@ -1,0 +1,1 @@
+Primary experiment trigger: HotpotQA pilot, 100 questions, retrieval depths 1,2,3,5,10. This file exists only to make the experiment state explicit in the repository.
