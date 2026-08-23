@@ -1,0 +1,1 @@
+HotpotQA source: official distractor development set referenced by the HotpotQA authors at http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_dev_distractor_v1.json. This project downloads it at workflow runtime and converts a deterministic 100-question pilot into EAR JSONL format.
