@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ear-rag"
+version = "0.1.0"
+description = "Evidence-Induced Answer Reversals in Retrieval-Augmented Generation"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+plots = ["matplotlib>=3.8"]
+
+[project.scripts]
+ear-run = "ear.runner:main"
+ear-analyze = "ear.analysis:main"
+ear-prepare = "ear.prepare:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
