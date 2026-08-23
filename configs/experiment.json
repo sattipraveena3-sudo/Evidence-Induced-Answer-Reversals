@@ -1,0 +1,7 @@
+{
+  "depths": [1, 2, 3, 5, 10],
+  "temperature": 0,
+  "scoring": "contains",
+  "recommended_n_per_dataset": 500,
+  "primary_metrics": ["Accuracy", "F1", "EAR", "BCR", "RTB", "EAR@K", "P-EAR", "FRD"]
+}
