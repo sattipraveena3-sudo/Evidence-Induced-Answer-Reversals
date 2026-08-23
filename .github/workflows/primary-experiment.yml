@@ -1,0 +1,37 @@
+name: Primary Experiment
+
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: OpenAI-compatible model name
+        required: true
+        default: gpt-4.1-mini
+      limit:
+        description: Number of questions
+        required: true
+        default: '500'
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    if: ${{ secrets.OPENAI_API_KEY != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -e '.[plots]'
+      - name: Require primary dataset
+        run: test -f data/primary.jsonl || (echo 'Add data/primary.jsonl before running the primary experiment' && exit 1)
+      - name: Generate trajectories
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          ear-run --input data/primary.jsonl --output results/primary_trajectories.jsonl --backend openai --model '${{ inputs.model }}' --depths 1,2,3,5,10 --limit '${{ inputs.limit }}'
+      - name: Analyze EAR results
+        run: ear-analyze --input results/primary_trajectories.jsonl --outdir results/primary --plots
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ear-primary-results
+          path: results/
