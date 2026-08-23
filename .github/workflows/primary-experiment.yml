@@ -32,28 +32,68 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
+      - name: Create diagnostics directory
+        run: mkdir -p results/debug
+
       - name: Verify API secret exists
+        shell: bash
         run: |
+          set -o pipefail
           if [ -z "$OPENAI_API_KEY" ]; then
-            echo 'OPENAI_API_KEY repository secret is missing.'
+            echo 'OPENAI_API_KEY repository secret is missing.' | tee results/debug/secret_check.log
             exit 1
           fi
-      - run: python -m pip install -e '.[plots]'
-      - name: Prepare official HotpotQA pilot set
-        run: python scripts/prepare_hotpotqa.py --output data/primary.jsonl --limit "$LIMIT" --seed 7
-      - name: Generate real Top-k trajectories
+          echo 'OPENAI_API_KEY is present.' | tee results/debug/secret_check.log
+
+      - name: Install project
+        shell: bash
         run: |
-          ear-run --input data/primary.jsonl --output results/primary_trajectories.jsonl --backend openai --model "$MODEL" --depths 1,2,3,5,10 --limit "$LIMIT"
+          set -o pipefail
+          python -m pip install -e '.[plots]' 2>&1 | tee results/debug/install.log
+
+      - name: Prepare official HotpotQA pilot set
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/prepare_hotpotqa.py --output data/primary.jsonl --limit "$LIMIT" --seed 7 2>&1 | tee results/debug/prepare.log
+
+      - name: Generate real Top-k trajectories
+        shell: bash
+        run: |
+          set -o pipefail
+          ear-run --input data/primary.jsonl --output results/primary_trajectories.jsonl --backend openai --model "$MODEL" --depths 1,2,3,5,10 --limit "$LIMIT" 2>&1 | tee results/debug/generation.log
+
       - name: Analyze EAR results
-        run: ear-analyze --input results/primary_trajectories.jsonl --outdir results/primary --plots
-      - name: Commit real primary results
+        shell: bash
+        run: |
+          set -o pipefail
+          ear-analyze --input results/primary_trajectories.jsonl --outdir results/primary --plots 2>&1 | tee results/debug/analysis.log
+
+      - name: Record workflow outcome
+        if: always()
+        shell: bash
+        run: |
+          echo "run_id=${GITHUB_RUN_ID}" > results/debug/workflow_metadata.txt
+          echo "run_attempt=${GITHUB_RUN_ATTEMPT}" >> results/debug/workflow_metadata.txt
+          echo "sha=${GITHUB_SHA}" >> results/debug/workflow_metadata.txt
+          echo "model=${MODEL}" >> results/debug/workflow_metadata.txt
+          echo "limit=${LIMIT}" >> results/debug/workflow_metadata.txt
+
+      - name: Commit results or failure diagnostics
+        if: always()
+        shell: bash
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -f results/primary results/primary_trajectories.jsonl
-          git commit -m 'Add real HotpotQA EAR pilot results' || exit 0
+          git add -f results/debug || true
+          if [ -d results/primary ]; then git add -f results/primary; fi
+          if [ -f results/primary_trajectories.jsonl ]; then git add -f results/primary_trajectories.jsonl; fi
+          git commit -m 'Persist EAR primary experiment results or diagnostics' || exit 0
           git push
+
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: ear-primary-results
           path: results/
