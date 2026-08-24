@@ -13,6 +13,10 @@ on:
         default: '100'
   push:
     branches: [main]
+    paths:
+      - 'src/**'
+      - 'scripts/**'
+      - '.github/workflows/primary-experiment.yml'
 
 permissions:
   contents: write
@@ -23,7 +27,7 @@ jobs:
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       MODEL: ${{ inputs.model || 'gpt-4.1-mini' }}
-      LIMIT: ${{ inputs.limit || '100' }}
+      LIMIT: ${{ inputs.limit || '5' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
