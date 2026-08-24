@@ -1,5 +1,5 @@
 from __future__ import annotations
-import os, json, urllib.request, time, re
+import os, json, urllib.request, urllib.error, time, re, random
 from abc import ABC, abstractmethod
 
 class Backend(ABC):
@@ -26,23 +26,52 @@ class OpenAIBackend(Backend):
         payload = json.dumps({
             "model": self.model,
             "messages": [{"role": "user", "content": prompt}],
-            "temperature": self.temperature
+            "temperature": self.temperature,
+            "max_tokens": 64
         }).encode("utf-8")
-        req = urllib.request.Request(
-            f"{self.base_url}/chat/completions",
-            data=payload,
-            headers={"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"},
-            method="POST",
-        )
-        for attempt in range(5):
+
+        last_error = None
+        for attempt in range(8):
+            req = urllib.request.Request(
+                f"{self.base_url}/chat/completions",
+                data=payload,
+                headers={
+                    "Authorization": f"Bearer {self.api_key}",
+                    "Content-Type": "application/json"
+                },
+                method="POST",
+            )
             try:
                 with urllib.request.urlopen(req, timeout=180) as r:
                     obj = json.loads(r.read().decode("utf-8"))
                 return obj["choices"][0]["message"]["content"].strip()
-            except Exception:
-                if attempt == 4:
+            except urllib.error.HTTPError as e:
+                try:
+                    body = e.read().decode("utf-8", errors="replace")
+                except Exception:
+                    body = ""
+                retry_after = e.headers.get("Retry-After") if e.headers else None
+                detail = f"OpenAI HTTP {e.code}: {body or e.reason}"
+                last_error = RuntimeError(detail)
+                # 401/403/404 are not transient. 429/5xx may be retried.
+                if e.code not in (408, 409, 429, 500, 502, 503, 504):
+                    raise last_error
+                # insufficient_quota will not be fixed by retries; surface it immediately.
+                if "insufficient_quota" in body or "billing" in body.lower():
+                    raise last_error
+                if attempt == 7:
+                    raise last_error
+                try:
+                    wait = float(retry_after) if retry_after else min(60.0, (2 ** attempt) + random.random())
+                except ValueError:
+                    wait = min(60.0, (2 ** attempt) + random.random())
+                time.sleep(wait)
+            except Exception as e:
+                last_error = e
+                if attempt == 7:
                     raise
-                time.sleep(2 ** attempt)
+                time.sleep(min(60.0, (2 ** attempt) + random.random()))
+        raise last_error or RuntimeError("OpenAI request failed")
 
 class MockBackend(Backend):
     answer_re = re.compile(r"\[\[answer:(.*?)\]\]", re.I)
