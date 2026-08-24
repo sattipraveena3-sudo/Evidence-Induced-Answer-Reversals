@@ -1,13 +1,5 @@
 Traceback (most recent call last):
-  File "/opt/hostedtoolcache/Python/3.11.16/x64/bin/ear-run", line 6, in <module>
-    sys.exit(main())
-             ^^^^^^
-  File "/home/runner/work/Evidence-Induced-Answer-Reversals/Evidence-Induced-Answer-Reversals/src/ear/runner.py", line 56, in main
-    run(p.parse_args())
-  File "/home/runner/work/Evidence-Induced-Answer-Reversals/Evidence-Induced-Answer-Reversals/src/ear/runner.py", line 31, in run
-    pred = backend.answer(ex.question, ex.passages[:use_k])
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/Evidence-Induced-Answer-Reversals/Evidence-Induced-Answer-Reversals/src/ear/backends.py", line 39, in answer
+  File "/home/runner/work/Evidence-Induced-Answer-Reversals/Evidence-Induced-Answer-Reversals/src/ear/backends.py", line 45, in answer
     with urllib.request.urlopen(req, timeout=180) as r:
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/urllib/request.py", line 216, in urlopen
@@ -28,3 +20,26 @@ Traceback (most recent call last):
   File "/opt/hostedtoolcache/Python/3.11.16/x64/lib/python3.11/urllib/request.py", line 643, in http_error_default
     raise HTTPError(req.full_url, code, msg, hdrs, fp)
 urllib.error.HTTPError: HTTP Error 429: Too Many Requests
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/opt/hostedtoolcache/Python/3.11.16/x64/bin/ear-run", line 6, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/runner/work/Evidence-Induced-Answer-Reversals/Evidence-Induced-Answer-Reversals/src/ear/runner.py", line 56, in main
+    run(p.parse_args())
+  File "/home/runner/work/Evidence-Induced-Answer-Reversals/Evidence-Induced-Answer-Reversals/src/ear/runner.py", line 31, in run
+    pred = backend.answer(ex.question, ex.passages[:use_k])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/Evidence-Induced-Answer-Reversals/Evidence-Induced-Answer-Reversals/src/ear/backends.py", line 61, in answer
+    raise last_error
+RuntimeError: OpenAI HTTP 429: {
+    "error": {
+        "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.",
+        "type": "insufficient_quota",
+        "param": null,
+        "code": "insufficient_quota"
+    }
+}
+

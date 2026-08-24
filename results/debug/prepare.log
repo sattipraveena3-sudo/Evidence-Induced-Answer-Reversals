@@ -1,5 +1,5 @@
 Downloading HotpotQA from http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_dev_distractor_v1.json
-HotpotQA source failed: <urlopen error [Errno -3] Temporary failure in name resolution>
+HotpotQA source failed: <urlopen error [Errno 110] Connection timed out>
 Downloading HotpotQA from https://huggingface.co/datasets/namlh2004/hotpotqa/resolve/main/hotpot_dev_distractor_v1.json?download=true
 Downloaded 7405 HotpotQA examples
-Wrote 100 questions to data/primary.jsonl
+Wrote 5 questions to data/primary.jsonl
