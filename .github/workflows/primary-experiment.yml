@@ -13,9 +13,6 @@ on:
         default: '100'
   push:
     branches: [main]
-    paths:
-      - 'scripts/prepare_hotpotqa.py'
-      - '.github/workflows/primary-experiment.yml'
 
 permissions:
   contents: write
