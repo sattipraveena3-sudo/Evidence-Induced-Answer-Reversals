@@ -16,6 +16,12 @@ jobs:
       - run: pytest -q
       - name: Run deterministic smoke experiment
         run: |
-          ear-run --input data/sample.jsonl --output /tmp/mock_trajectories.jsonl --backend mock --depths 1,2,3,5
+          ear-run \
+            --input data/sample.jsonl \
+            --output /tmp/mock_trajectories.jsonl \
+            --backend mock \
+            --depths 1,2,3,5 \
+            --gate lexical
           ear-analyze --input /tmp/mock_trajectories.jsonl --outdir /tmp/mock_results
           test -f /tmp/mock_results/summary.json
+          test -f /tmp/mock_results/gate_summary.json

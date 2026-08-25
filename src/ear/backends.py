@@ -1,14 +1,28 @@
 from __future__ import annotations
-import os, json, urllib.request, urllib.error, time, re, random
+
+import json
+import os
+import random
+import re
+import time
+import urllib.error
+import urllib.request
 from abc import ABC, abstractmethod
+
 
 class Backend(ABC):
     @abstractmethod
     def answer(self, question: str, passages: list[str]) -> str:
         raise NotImplementedError
 
+
 class OpenAIBackend(Backend):
-    def __init__(self, model: str, temperature: float = 0.0, base_url: str = "https://api.openai.com/v1"):
+    def __init__(
+        self,
+        model: str,
+        temperature: float = 0.0,
+        base_url: str = "https://api.openai.com/v1",
+    ):
         self.model = model
         self.temperature = temperature
         self.base_url = base_url.rstrip("/")
@@ -16,19 +30,15 @@ class OpenAIBackend(Backend):
         if not self.api_key:
             raise RuntimeError("OPENAI_API_KEY is not set")
 
-    def answer(self, question: str, passages: list[str]) -> str:
-        context = "\n\n".join(f"[{i+1}] {p}" for i, p in enumerate(passages))
-        prompt = (
-            "Answer the question using only the evidence below. "
-            "Return only a short factual answer. If the evidence is insufficient, return unknown.\n\n"
-            f"Question: {question}\n\nEvidence:\n{context}"
-        )
-        payload = json.dumps({
-            "model": self.model,
-            "messages": [{"role": "user", "content": prompt}],
-            "temperature": self.temperature,
-            "max_tokens": 64
-        }).encode("utf-8")
+    def complete(self, prompt: str, max_tokens: int = 64) -> str:
+        payload = json.dumps(
+            {
+                "model": self.model,
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": self.temperature,
+                "max_tokens": max_tokens,
+            }
+        ).encode("utf-8")
 
         last_error = None
         for attempt in range(8):
@@ -37,7 +47,7 @@ class OpenAIBackend(Backend):
                 data=payload,
                 headers={
                     "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 },
                 method="POST",
             )
@@ -48,7 +58,7 @@ class OpenAIBackend(Backend):
             except urllib.error.HTTPError as e:
                 try:
                     body = e.read().decode("utf-8", errors="replace")
-                except Exception:
+                except (OSError, UnicodeError):
                     body = ""
                 retry_after = e.headers.get("Retry-After") if e.headers else None
                 detail = f"OpenAI HTTP {e.code}: {body or e.reason}"
@@ -62,20 +72,34 @@ class OpenAIBackend(Backend):
                 if attempt == 7:
                     raise last_error
                 try:
-                    wait = float(retry_after) if retry_after else min(60.0, (2 ** attempt) + random.random())
+                    wait = (
+                        float(retry_after)
+                        if retry_after
+                        else min(60.0, (2**attempt) + random.random())
+                    )
                 except ValueError:
-                    wait = min(60.0, (2 ** attempt) + random.random())
+                    wait = min(60.0, (2**attempt) + random.random())
                 time.sleep(wait)
             except Exception as e:
                 last_error = e
                 if attempt == 7:
                     raise
-                time.sleep(min(60.0, (2 ** attempt) + random.random()))
+                time.sleep(min(60.0, (2**attempt) + random.random()))
         raise last_error or RuntimeError("OpenAI request failed")
 
+    def answer(self, question: str, passages: list[str]) -> str:
+        context = "\n\n".join(f"[{i + 1}] {p}" for i, p in enumerate(passages))
+        prompt = (
+            "Answer the question using only the evidence below. "
+            "Return only a short factual answer. If the evidence is insufficient, return unknown.\n\n"
+            f"Question: {question}\n\nEvidence:\n{context}"
+        )
+        return self.complete(prompt, 64)
+
+
 class MockBackend(Backend):
-    answer_re = re.compile(r"\[\[answer:(.*?)\]\]", re.I)
-    flip_re = re.compile(r"\[\[flip:(.*?)\]\]", re.I)
+    answer_re = re.compile(r"\[\[answer:(.*?)\]\]", re.IGNORECASE)
+    flip_re = re.compile(r"\[\[flip:(.*?)\]\]", re.IGNORECASE)
 
     def answer(self, question: str, passages: list[str]) -> str:
         ans = "unknown"
@@ -88,8 +112,13 @@ class MockBackend(Backend):
                 ans = f.group(1).strip()
         return ans
 
-def make_backend(name: str, model: str | None, temperature: float = 0.0,
-                 base_url: str = "https://api.openai.com/v1") -> Backend:
+
+def make_backend(
+    name: str,
+    model: str | None,
+    temperature: float = 0.0,
+    base_url: str = "https://api.openai.com/v1",
+) -> Backend:
     if name == "mock":
         return MockBackend()
     if name == "openai":

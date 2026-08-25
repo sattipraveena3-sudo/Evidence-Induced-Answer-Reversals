@@ -1,1 +1,1 @@
-Documentation for the EAR research workflow. See `experiment_status.md`, `hotpotqa_source.md`, `result_contract.md`, and `reproducibility.md`.
+Documentation for the EAR research workflow. Start with `RESEARCH_IDENTITY.md`, `LITERATURE_MAP.md`, and `GATE_PROTOCOL.md`; implementation status and output requirements are recorded in `experiment_status.md`, `reproducibility.md`, and `result_contract.md`.

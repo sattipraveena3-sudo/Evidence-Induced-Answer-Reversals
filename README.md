@@ -10,9 +10,10 @@ The first stage of the repository measures answer trajectories. The planned seco
 
 - [Research identity and scope](docs/RESEARCH_IDENTITY.md)
 - [27-paper literature map](docs/LITERATURE_MAP.md)
+- [Pre-registered gate protocol](docs/GATE_PROTOCOL.md)
 - [Current experiment status](docs/experiment_status.md)
 
-**Research status:** the software pipeline and mock smoke test are verified; the primary real-model experiment and mitigation study are still pending. Mock outputs are never research findings.
+**Research status:** the trajectory pipeline and first change-triggered gate implementation are verified by unit tests and a mock smoke workflow. The primary real-model experiment is still pending. Mock outputs are never research findings.
 
 ## Core metrics
 
@@ -36,8 +37,9 @@ src/ear/
   schema.py       Data validation and normalization
   scoring.py      Exact-match and token-F1 scoring
   backends.py     Mock and OpenAI-compatible model backends
+  gate.py         Change detection, lexical baseline, and model verifier
   runner.py       Generate Top-k answer trajectories
-  analysis.py     Compute EAR/BCR/RTB/P-EAR/FRD + bootstrap CIs
+  analysis.py     Compute raw and selective-gate metrics + bootstrap CIs
   prepare.py      Dataset conversion utilities
 scripts/
   run_smoke_test.sh
@@ -59,7 +61,8 @@ ear-run \
   --input data/sample.jsonl \
   --output results/mock_trajectories.jsonl \
   --backend mock \
-  --depths 1,2,3,5
+  --depths 1,2,3,5 \
+  --gate lexical
 
 ear-analyze \
   --input results/mock_trajectories.jsonl \
@@ -85,7 +88,8 @@ ear-run \
   --backend openai \
   --model gpt-4.1-mini \
   --depths 1,2,3,5,10 \
-  --limit 500
+  --limit 500 \
+  --gate model
 ```
 
 Then:
@@ -115,6 +119,23 @@ Each JSONL line:
 
 **Important:** `passages` must be one fixed retrieval ranking. Top-5 must be the exact Top-3 prefix plus two additional passages.
 
+## Evidence-stability gate
+
+The gate keeps the last non-abstained answer as a stable anchor. At each larger retrieval depth:
+
+1. If the normalized candidate answer is unchanged, the verifier is not called.
+2. If the answer changes, the verifier compares the anchor and candidate using only the current evidence.
+3. The verifier returns `accept_new`, `retain_previous`, or `abstain`.
+4. An abstention does not erase the last stable anchor, so later evidence can still repair the answer.
+
+Two verifier modes are implemented:
+
+- `--gate lexical` is a deterministic, gold-label-free comparative-support baseline.
+- `--gate model` uses the same OpenAI-compatible completion backend with a fixed JSON decision contract. The endpoint can be a local or free-notebook-hosted open model; the core study does not require a paid API.
+- `--gate never-update` and `--gate always-abstain` are sanity baselines that expose trivial ways to suppress harmful transitions.
+
+Neither verifier receives the reference answer or correctness label. Gate analysis reports incorrect-answer transitions and correct-to-abstain transitions separately, alongside BCR retention, coverage, selective accuracy, call rate, and latency. This prevents abstention from being misreported as a free reliability improvement. See the [gate protocol](docs/GATE_PROTOCOL.md).
+
 ## Publication protocol
 
 Recommended primary run:
@@ -134,11 +155,15 @@ Recent work already studies retrieval-size robustness, correct/wrong transitions
 
 ## Generated outputs
 
-`summary.json` — machine-readable metrics  
-`summary.csv` — table-ready results  
-`transitions.csv` — EAR/BCR/RTB per depth transition  
-`reversal_examples.jsonl` — all observed C→W examples  
-`trajectory_counts.csv` — trajectory taxonomy counts  
+- `summary.json` — machine-readable metrics
+- `summary.csv` — table-ready results
+- `transitions.csv` — EAR/BCR/RTB per depth transition
+- `reversal_examples.jsonl` — all observed C→W examples
+- `trajectory_counts.csv` — trajectory taxonomy counts
+- `gate_summary.json` — raw-versus-gated reliability and coverage trade-offs
+- `gate_depth_metrics.csv` — coverage and selective accuracy at each depth
+- `gate_transitions.csv` — raw EAR/BCR versus gated harm, repair, and abstention
+- `gate_decisions.csv` — initial, unchanged, accept, retain, and abstain counts
 
 If matplotlib is installed, `ear-analyze --plots` also writes publication-ready PNG figures.
 

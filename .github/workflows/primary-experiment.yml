@@ -11,12 +11,10 @@ on:
         description: Number of questions
         required: true
         default: '100'
-  push:
-    branches: [main]
-    paths:
-      - 'src/**'
-      - 'scripts/**'
-      - '.github/workflows/primary-experiment.yml'
+      gate:
+        description: Gate mode from the ear-run CLI
+        required: true
+        default: model
 
 permissions:
   contents: write
@@ -28,6 +26,7 @@ jobs:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       MODEL: ${{ inputs.model || 'gpt-4.1-mini' }}
       LIMIT: ${{ inputs.limit || '5' }}
+      GATE: ${{ inputs.gate || 'model' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -63,7 +62,15 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          ear-run --input data/primary.jsonl --output results/primary_trajectories.jsonl --backend openai --model "$MODEL" --depths 1,2,3,5,10 --limit "$LIMIT" 2>&1 | tee results/debug/generation.log
+          ear-run \
+            --input data/primary.jsonl \
+            --output results/primary_trajectories.jsonl \
+            --backend openai \
+            --model "$MODEL" \
+            --depths 1,2,3,5,10 \
+            --limit "$LIMIT" \
+            --gate "$GATE" \
+            2>&1 | tee results/debug/generation.log
 
       - name: Analyze EAR results
         shell: bash
@@ -80,6 +87,7 @@ jobs:
           echo "sha=${GITHUB_SHA}" >> results/debug/workflow_metadata.txt
           echo "model=${MODEL}" >> results/debug/workflow_metadata.txt
           echo "limit=${LIMIT}" >> results/debug/workflow_metadata.txt
+          echo "gate=${GATE}" >> results/debug/workflow_metadata.txt
 
       - name: Commit results or failure diagnostics
         if: always()

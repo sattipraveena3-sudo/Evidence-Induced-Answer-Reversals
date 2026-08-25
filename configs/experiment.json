@@ -3,5 +3,22 @@
   "temperature": 0,
   "scoring": "contains",
   "recommended_n_per_dataset": 500,
-  "primary_metrics": ["Accuracy", "F1", "EAR", "BCR", "RTB", "EAR@K", "P-EAR", "FRD"]
+  "primary_metrics": ["Accuracy", "F1", "EAR", "BCR", "RTB", "EAR@K", "P-EAR", "FRD"],
+  "gate": {
+    "primary": "model",
+    "baseline": "lexical",
+    "sanity_baselines": ["never-update", "always-abstain"],
+    "support_threshold": 0.8,
+    "margin": 0.2,
+    "abstain_answer": "unknown"
+  },
+  "gate_metrics": [
+    "Gated harmful transition rate",
+    "Correct-to-abstain rate",
+    "BCR retention",
+    "Coverage",
+    "Selective accuracy",
+    "Verifier call rate",
+    "Verifier latency"
+  ]
 }

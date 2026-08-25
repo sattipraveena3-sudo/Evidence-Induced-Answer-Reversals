@@ -15,3 +15,9 @@ If aggregate accuracy increased while EAR remained non-zero, this directly demon
 ## Qualitative analysis
 
 Use `reversal_examples.jsonl` to select real C→W cases. Do not invent examples.
+
+## Evidence-stability gate
+
+The gate was invoked on **[CALLS]** transitions (**[CALL RATE]**). Relative to raw EAR **[RAW EAR]**, the gated harmful answered-transition rate was **[GATED HARM]**, while correct-to-abstain transitions were **[C→A]**. BCR retention was **[BCR RETENTION]**. At the final depth, coverage was **[COVERAGE]** and selective accuracy was **[SELECTIVE ACCURACY]**.
+
+Report paired bootstrap intervals and per-dataset values for every bracketed field. A decrease in harmful answered transitions must not be described as an improvement without the accompanying abstention and BCR trade-offs.
