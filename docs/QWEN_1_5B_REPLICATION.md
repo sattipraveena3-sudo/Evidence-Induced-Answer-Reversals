@@ -36,3 +36,7 @@ Compare the new condition with the published 0.5B pilot on the identical IDs:
 5. Gate coverage, answered accuracy, harmful transitions, and BCR retention as descriptive diagnostics.
 
 No prompt, threshold, scoring rule, sample, or depth may be changed after observing results under this preregistration. Any deviation or replacement run must be recorded in the final manifest and result card.
+
+## Publication provenance
+
+The condition was frozen in local Git object `38c40aa6c9e4f030f73524a3b5c96732119c369e` and the paired-analysis implementation in `ee13853f4d0d652fbf19badd77346ef67063eb80` before generation. The connected GitHub transport later recreated content-identical tree snapshots as public commits `be12be3b8499a95ce6a1c4a64c614396fff4a267` and `74484164ee4a0c5949bf32ff5dafcb19ef97423b`. Consequently, the public commit dates record post-run publication rather than an independent public preregistration timestamp. The result manifest preserves this distinction.

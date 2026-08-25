@@ -15,3 +15,14 @@ The lexical gate defaults are support threshold 0.8 and comparative margin 0.2. 
 - Uncertainty: 3,000 question-level bootstrap resamples with seed 7
 
 Run `python -m pip install -e '.[local]'` followed by `scripts/run_free_pilot.sh`. The exact completed-run metadata and artifact digests are frozen in the [manifest](../results/pilot_qwen2_5_0_5b_hotpotqa_100/manifest.json).
+
+## Published 1.5B scale replication
+
+- Pre-generation local Git objects: preregistration `38c40aa6c9e4f030f73524a3b5c96732119c369e`; paired analysis `ee13853f4d0d652fbf19badd77346ef67063eb80`. Their content-equivalent public commits are `be12be3b8499a95ce6a1c4a64c614396fff4a267` and `74484164ee4a0c5949bf32ff5dafcb19ef97423b`. The connected transport published them after the run, so this was prospectively frozen but not independently publicly timestamped before generation.
+- Dataset, order, ranking, prompts, depths, decoding, scoring, gate, and bootstrap settings are identical to the 0.5B pilot.
+- Generator: `Qwen/Qwen2.5-1.5B-Instruct-GGUF` revision `91cad51170dc346986eccefdc2dd33a9da36ead9`, file `qwen2.5-1.5b-instruct-q4_k_m.gguf`.
+- Model SHA-256: `6a1a2eb6d15622bf3c96857206351ba97e1af16c30d7a74ee38970e434e9407e`.
+- Runtime: `llama-cpp-python==0.3.35`, context 4096, batch 512, 9 CPU threads, seed 7, maximum 32 new tokens.
+- Raw-trajectory SHA-256: `6ddbaaa180291cf4b767e167e02879cf8736019a53f75924e944bbd488a91086`.
+
+Run `python -m pip install -e '.[local,plots]'` followed by `scripts/run_qwen_1_5b_replication.sh`. Exact metadata, execution notes, audit counts, and artifact hashes are in the [replication manifest](../results/replication_qwen2_5_1_5b_hotpotqa_100/manifest.json).

@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "status": "completed_real_model_within_family_scale_replication",
+  "completed_at_utc": "2026-08-25T20:36:47Z",
+  "preregistration": {
+    "study_id": "qwen2_5_1_5b_hotpotqa_100_scale_replication",
+    "frozen_at_utc": "2026-08-25T20:06:33Z",
+    "local_pre_generation_commit_object": "38c40aa6c9e4f030f73524a3b5c96732119c369e",
+    "published_content_equivalent_commit": "be12be3b8499a95ce6a1c4a64c614396fff4a267",
+    "local_pre_generation_paired_analysis_commit_object": "ee13853f4d0d652fbf19badd77346ef67063eb80",
+    "published_content_equivalent_paired_analysis_commit": "74484164ee4a0c5949bf32ff5dafcb19ef97423b",
+    "generation_started_after_both_local_commits": true,
+    "independently_publicly_timestamped_before_generation": false,
+    "publication_note": "The connected GitHub transport recreated content-equivalent commits after the run; public commit timestamps therefore record publication, not the local freeze time.",
+    "protocol_deviations": []
+  },
+  "dataset": {
+    "name": "HotpotQA",
+    "configuration": "distractor development",
+    "license": "CC BY-SA 4.0",
+    "official_url": "http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_dev_distractor_v1.json",
+    "mirror_repository": "namlh2004/hotpotqa",
+    "mirror_revision": "7e54db4656209750ff487f6fdf8e39a66dba136b",
+    "source_sha256": "e3da074df24e8369009918aa5cdbdd254dadcde4c63f7569d36afd6f2268caa8",
+    "source_rows": 7405,
+    "sample_rows": 100,
+    "sample_seed": 7,
+    "prepared_sample_sha256": "915d6b5706981b0f76e13bd56e3b81f8e09d11be09fd44ad1aa405aadb99f424",
+    "ordered_ids_match_published_pilot": true
+  },
+  "retrieval": {
+    "ranking": "deterministic lexical-overlap baseline",
+    "depths": [1, 2, 3, 5, 10],
+    "fixed_prefixes": true
+  },
+  "generator": {
+    "repository": "Qwen/Qwen2.5-1.5B-Instruct-GGUF",
+    "repository_revision": "91cad51170dc346986eccefdc2dd33a9da36ead9",
+    "file": "qwen2.5-1.5b-instruct-q4_k_m.gguf",
+    "quantization": "Q4_K_M",
+    "model_sha256": "6a1a2eb6d15622bf3c96857206351ba97e1af16c30d7a74ee38970e434e9407e",
+    "runtime": "llama-cpp-python==0.3.35",
+    "temperature": 0.0,
+    "seed": 7,
+    "context_size": 4096,
+    "batch_size": 512,
+    "threads": 9,
+    "max_new_tokens": 32,
+    "generation_calls": 500,
+    "prompt_tokens": 336528,
+    "completion_tokens": 2830,
+    "total_tokens": 339358,
+    "measured_generation_latency_sum_seconds": 1018.707227107,
+    "script_wall_time_seconds": 1086.064
+  },
+  "scoring": {
+    "primary_binary": "normalized contiguous whole-token answer containment",
+    "continuous": "normalized token F1",
+    "sensitivity_binary": "normalized exact match",
+    "bootstrap_resamples": 3000,
+    "bootstrap_seed": 7,
+    "bootstrap_unit": "question",
+    "all_saved_primary_labels_recomputed_without_mismatch": true
+  },
+  "primary_results": {
+    "accuracy_by_depth": [0.22, 0.36, 0.37, 0.32, 0.40],
+    "ear_at_k": 0.22,
+    "ear_at_k_bootstrap_95_ci": [0.14, 0.30],
+    "persistent_ear": 0.13,
+    "persistent_ear_bootstrap_95_ci": [0.07, 0.20],
+    "median_first_reversal_depth": 5,
+    "overall_adjacent_ear": 0.0575,
+    "overall_adjacent_bcr": 0.1025
+  },
+  "paired_vs_qwen2_5_0_5b": {
+    "baseline_commit": "ae62cb2733b67fc87b33793377ee612f5839fe4b",
+    "baseline_trajectories_sha256": "30ab57ed3490c069504227f938963ac6b2a649af0d9502381a17ebbdf15840a3",
+    "ear_at_k_difference": -0.01,
+    "ear_at_k_difference_bootstrap_95_ci": [-0.11, 0.10],
+    "persistent_ear_difference": 0.01,
+    "persistent_ear_difference_bootstrap_95_ci": [-0.08, 0.10],
+    "overall_adjacent_ear_difference": -0.005,
+    "overall_adjacent_ear_difference_bootstrap_95_ci": [-0.0325, 0.025],
+    "overall_adjacent_bcr_difference": 0.0175,
+    "overall_adjacent_bcr_difference_bootstrap_95_ci": [-0.01, 0.0425],
+    "reversal_set_shared": 8,
+    "reversal_set_baseline_only": 15,
+    "reversal_set_candidate_only": 14,
+    "reversal_set_jaccard": 0.21621621621621623
+  },
+  "gate": {
+    "mode": "lexical",
+    "support_threshold": 0.8,
+    "margin": 0.2,
+    "gold_labels_visible": false,
+    "overall_raw_ear": 0.0575,
+    "overall_answered_gated_harmful": 0.005,
+    "relative_answered_harm_reduction": 0.9130434782608696,
+    "overall_raw_bcr": 0.1025,
+    "bcr_retention": 0.2926829268292683,
+    "final_coverage": 0.61,
+    "final_raw_accuracy": 0.40,
+    "final_answered_accuracy": 0.22,
+    "final_selective_accuracy": 0.36065573770491804,
+    "interpretation": "negative diagnostic baseline; harm reduction is coupled to lost coverage and repairs"
+  },
+  "exact_match_sensitivity": {
+    "accuracy_by_depth": [0.19, 0.26, 0.29, 0.25, 0.30],
+    "ear_at_k": 0.17,
+    "ear_at_k_bootstrap_95_ci": [0.10, 0.24],
+    "persistent_ear": 0.11,
+    "persistent_ear_bootstrap_95_ci": [0.05, 0.17],
+    "paired_ear_at_k_difference": -0.02,
+    "paired_ear_at_k_difference_bootstrap_95_ci": [-0.12, 0.08]
+  },
+  "manual_scoring_audit": {
+    "reviewer_count": 1,
+    "blinded": false,
+    "distinct_candidate_outputs_positive_only_under_containment": 17,
+    "clearly_valid_expanded_answers": 15,
+    "clear_contradictory_false_positive": 1,
+    "ambiguous_indirect_match": 1,
+    "primary_reversal_questions_reviewed": 22,
+    "primary_reversal_questions_with_unambiguous_correct_pre_reversal_answer": 21,
+    "details": "SCORING_AUDIT.md"
+  },
+  "environment": {
+    "python": "3.12.13",
+    "compute": "CPU only",
+    "cpu": "AMD EPYC 9V74 80-Core Processor",
+    "available_cpu_threads": 9,
+    "operating_system": "Linux 6.18.35 x86_64"
+  },
+  "execution_notes": [
+    "The official CMU dataset endpoint returned HTTP 502, so the preregistered pinned Hugging Face mirror fallback was used.",
+    "The local llama-cpp-python wheel was compiled with GCC because the container's inherited CC=clang pointed to an unavailable compiler.",
+    "GitHub publication used content-equivalent recreated commits because the local Git client had no write credential; original pre-generation local commit hashes remain recorded above.",
+    "Neither execution note changes the sample, model, prompt, inference settings, scoring, or analysis."
+  ],
+  "integrity": {
+    "answer_content_sha256": "cc10c764550558869043bed9bd25a0d89b9f6c3d3d025e2ba76a5eb02082bb53",
+    "answer_content_canonicalization": "newline-separated compact sorted-key JSON objects with id, k, and answer",
+    "trajectories_sha256": "6ddbaaa180291cf4b767e167e02879cf8736019a53f75924e944bbd488a91086",
+    "summary_sha256": "e39d7ee239a5d03635e908810c4a372b23c8a27771f767cc0de82814b89d0a7a",
+    "gate_summary_sha256": "3ce45659323667f66e444ce09f5b5fa79b667187f10f32ff9e0e67b9ef84d2b7",
+    "reversal_examples_sha256": "53ca22db722bbadd457cc08e4aa8bc943cb07bb9bb3f94e7df53234b5d1377f0",
+    "paired_comparison_sha256": "063e6df2e1d6fea6e7ca9b55e534c72b1a66a1d7357c55be4bfd4ee7ddec346b",
+    "exact_summary_sha256": "943319c9c04d5d1a6255176e8b5aa6d4efb4a8c864c7cc647b325545c3a89fe1",
+    "exact_paired_comparison_sha256": "28bad123327d04dc3d433bb15e93c2d770731101e4d87d0ae78a8a9959015c19",
+    "accuracy_plot_sha256": "97bbbf2258d861b33e2e77e7933d01774a7afd585a1556d0e004e00627c86955",
+    "transition_plot_sha256": "befcbc995928919cc6d8a4c6b808fe7ed053c9cac52f76afe8defd2697c95e99",
+    "paired_accuracy_plot_sha256": "29d19290f64a39f10e0551d474f4c449c3acc592d7d23fa9f5bc5eb4cfdfec7a"
+  },
+  "limitations": [
+    "Exploratory 100-question within-family scale replication, not a confirmatory primary experiment",
+    "One quantized model family and one lexical ranking condition",
+    "Low absolute QA performance and wide uncertainty intervals",
+    "Primary containment scoring has one clear and one ambiguous false-positive case in the candidate condition",
+    "Manual scoring audit used one non-blinded reviewer",
+    "No causal mechanism or validated mitigation effectiveness is established"
+  ]
+}

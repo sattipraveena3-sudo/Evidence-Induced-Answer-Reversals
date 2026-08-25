@@ -307,7 +307,9 @@ def write_comparison(result: dict, outdir: Path) -> None:
     )
     rows = _comparison_rows(result)
     with (outdir / "comparison.csv").open("w", newline="", encoding="utf-8") as output:
-        writer = csv.DictWriter(output, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(
+            output, fieldnames=list(rows[0]), lineterminator="\n"
+        )
         writer.writeheader()
         writer.writerows(rows)
     with (outdir / "reversal_set_membership.csv").open(
@@ -316,9 +318,35 @@ def write_comparison(result: dict, outdir: Path) -> None:
         writer = csv.DictWriter(
             output,
             fieldnames=["id", "baseline_any_ear", "candidate_any_ear", "category"],
+            lineterminator="\n",
         )
         writer.writeheader()
         writer.writerows(result["reversal_membership"])
+
+
+def make_plots(result: dict, outdir: Path) -> None:
+    try:
+        import matplotlib.pyplot as plt
+    except ImportError:
+        print("matplotlib not installed; skipping comparison plots")
+        return
+
+    depths = result["depths"]
+    baseline = [item["baseline"] for item in result["accuracy"]]
+    candidate = [item["candidate"] for item in result["accuracy"]]
+    fig = plt.figure(figsize=(7.2, 4.5))
+    plt.plot(depths, baseline, marker="o", label=result["baseline_label"])
+    plt.plot(depths, candidate, marker="o", label=result["candidate_label"])
+    plt.xlabel("Retrieval depth k")
+    plt.ylabel("Accuracy")
+    plt.title("Paired accuracy by model scale")
+    plt.xticks(depths)
+    plt.ylim(0, 1)
+    plt.grid(axis="y", alpha=0.25)
+    plt.legend()
+    plt.tight_layout()
+    fig.savefig(outdir / "paired_accuracy_by_k.png", dpi=200)
+    plt.close(fig)
 
 
 def main() -> None:
@@ -330,6 +358,7 @@ def main() -> None:
     parser.add_argument("--outdir", required=True, type=Path)
     parser.add_argument("--baseline-label", default="baseline")
     parser.add_argument("--candidate-label", default="candidate")
+    parser.add_argument("--plots", action="store_true")
     args = parser.parse_args()
     result = compare_rows(
         load_jsonl(args.baseline),
@@ -338,6 +367,8 @@ def main() -> None:
         candidate_label=args.candidate_label,
     )
     write_comparison(result, args.outdir)
+    if args.plots:
+        make_plots(result, args.outdir)
     print(
         json.dumps(
             {key: value for key, value in result.items() if key != "reversal_membership"},

@@ -8,4 +8,8 @@ results/*
 !results/.gitkeep
 !results/pilot_qwen2_5_0_5b_hotpotqa_100/
 !results/pilot_qwen2_5_0_5b_hotpotqa_100/**
+!results/replication_qwen2_5_1_5b_hotpotqa_100/
+!results/replication_qwen2_5_1_5b_hotpotqa_100/**
+!results/comparison_qwen2_5_0_5b_vs_1_5b_hotpotqa_100/
+!results/comparison_qwen2_5_0_5b_vs_1_5b_hotpotqa_100/**
 data/primary.jsonl

@@ -14,7 +14,7 @@ The first stage of the repository measures answer trajectories. The planned seco
 - [Pre-registered Qwen2.5-1.5B scale replication](docs/QWEN_1_5B_REPLICATION.md)
 - [Current experiment status](docs/experiment_status.md)
 
-**Research status:** a completed 100-question, 500-generation open-weight pilot now provides the first real-model evidence. It found harmful answer reversals and exposed a severe coverage/repair trade-off in the lexical gate. This is an exploratory single-model pilot, not the multi-model primary experiment or a paper-level conclusion. Mock outputs are never research findings. See the [pilot result card](results/pilot_qwen2_5_0_5b_hotpotqa_100/RESULTS.md).
+**Research status:** the completed 0.5B pilot and prospectively frozen 1.5B scale replication provide 1,000 real open-weight generations on matched questions. Both found harmful answer reversals; paired intervals do not show that scale reduced their incidence, and the lexical gate retains too few useful repairs. These are exploratory conditions within one model family, not the multi-family primary experiment or a paper-level conclusion. Mock outputs are never research findings. See the [1.5B result card](results/replication_qwen2_5_1_5b_hotpotqa_100/RESULTS.md) and [paired comparison](results/comparison_qwen2_5_0_5b_vs_1_5b_hotpotqa_100/RESULTS.md).
 
 ## Core metrics
 

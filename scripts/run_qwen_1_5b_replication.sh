@@ -39,14 +39,16 @@ ear-run \
   --gate lexical
 ear-analyze \
   --input "${replication_results}/trajectories.jsonl" \
-  --outdir "${replication_results}"
+  --outdir "${replication_results}" \
+  --plots
 
 ear-compare \
   --baseline "${baseline_trajectories}" \
   --candidate "${replication_results}/trajectories.jsonl" \
   --outdir "${comparison_results}" \
   --baseline-label "Qwen2.5-0.5B-Instruct-Q4_K_M" \
-  --candidate-label "Qwen2.5-1.5B-Instruct-Q4_K_M"
+  --candidate-label "Qwen2.5-1.5B-Instruct-Q4_K_M" \
+  --plots
 
 baseline_exact="/tmp/ear-qwen2.5-0.5b-hotpotqa-100-exact.jsonl"
 replication_exact="/tmp/ear-qwen2.5-1.5b-hotpotqa-100-exact.jsonl"

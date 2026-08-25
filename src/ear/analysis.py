@@ -315,15 +315,19 @@ def write_gate_outputs(res, outdir: Path):
     with (outdir / "gate_depth_metrics.csv").open(
         "w", newline="", encoding="utf-8"
     ) as f:
-        writer = csv.DictWriter(f, fieldnames=list(res["depth_metrics"][0]))
+        writer = csv.DictWriter(
+            f, fieldnames=list(res["depth_metrics"][0]), lineterminator="\n"
+        )
         writer.writeheader()
         writer.writerows(res["depth_metrics"])
     with (outdir / "gate_transitions.csv").open("w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=list(res["transitions"][0]))
+        writer = csv.DictWriter(
+            f, fieldnames=list(res["transitions"][0]), lineterminator="\n"
+        )
         writer.writeheader()
         writer.writerows(res["transitions"])
     with (outdir / "gate_decisions.csv").open("w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
+        writer = csv.writer(f, lineterminator="\n")
         writer.writerow(["decision", "count"])
         for decision, count in sorted(res["verifier"]["decision_counts"].items()):
             writer.writerow([decision, count])
@@ -334,7 +338,7 @@ def write_outputs(res, outdir: Path, rows=None):
     safe = {k: v for k, v in res.items() if k != "reversal_examples"}
     (outdir / "summary.json").write_text(json.dumps(safe, indent=2), encoding="utf-8")
     with (outdir / "summary.csv").open("w", newline="", encoding="utf-8") as f:
-        w = csv.writer(f)
+        w = csv.writer(f, lineterminator="\n")
         w.writerow(["metric", "k_or_transition", "value", "ci_low", "ci_high"])
         for a in res["accuracy"]:
             w.writerow(["accuracy", a["k"], a["accuracy"], a["ci_low"], a["ci_high"]])
@@ -352,13 +356,13 @@ def write_outputs(res, outdir: Path, rows=None):
             "bcr_ci_high",
             "rtb",
         ]
-        w = csv.DictWriter(f, fieldnames=fields)
+        w = csv.DictWriter(f, fieldnames=fields, lineterminator="\n")
         w.writeheader()
         w.writerows(res["transitions"])
     with (outdir / "trajectory_counts.csv").open(
         "w", newline="", encoding="utf-8"
     ) as f:
-        w = csv.writer(f)
+        w = csv.writer(f, lineterminator="\n")
         w.writerow(["trajectory_type", "count"])
         for k, v in sorted(res["trajectory_counts"].items()):
             w.writerow([k, v])
@@ -381,18 +385,23 @@ def make_plots(res, outdir: Path):
         return
     ks = [x["k"] for x in res["accuracy"]]
     vals = [x["accuracy"] for x in res["accuracy"]]
-    fig = plt.figure()
-    plt.plot(ks, vals, marker="o")
+    lower = [value - item["ci_low"] for value, item in zip(vals, res["accuracy"])]
+    upper = [item["ci_high"] - value for value, item in zip(vals, res["accuracy"])]
+    fig = plt.figure(figsize=(7.2, 4.5))
+    plt.errorbar(ks, vals, yerr=[lower, upper], marker="o", capsize=4)
     plt.xlabel("Retrieval depth k")
     plt.ylabel("Accuracy")
     plt.title("Accuracy across retrieval depth")
+    plt.xticks(ks)
+    plt.ylim(0, 1)
+    plt.grid(axis="y", alpha=0.25)
     plt.tight_layout()
     fig.savefig(outdir / "accuracy_by_k.png", dpi=200)
     plt.close(fig)
     labels = [f"{x['from_k']}→{x['to_k']}" for x in res["transitions"]]
     ear = [x["ear"] for x in res["transitions"]]
     bcr = [x["bcr"] for x in res["transitions"]]
-    fig = plt.figure()
+    fig = plt.figure(figsize=(7.2, 4.5))
     x = range(len(labels))
     plt.plot(x, ear, marker="o", label="EAR")
     plt.plot(x, bcr, marker="o", label="BCR")
@@ -400,6 +409,8 @@ def make_plots(res, outdir: Path):
     plt.xlabel("Retrieval-depth transition")
     plt.ylabel("Rate")
     plt.title("Harmful reversals vs beneficial corrections")
+    plt.ylim(bottom=0)
+    plt.grid(axis="y", alpha=0.25)
     plt.legend()
     plt.tight_layout()
     fig.savefig(outdir / "ear_bcr_by_transition.png", dpi=200)

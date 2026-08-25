@@ -20,8 +20,12 @@ The pilot observed EAR@K = 23% (bootstrap 95% CI 15%–32%) and P-EAR = 12% (6%�
 
 The raw trajectories, result tables, hashes, and limitations are in the [pilot result card](../results/pilot_qwen2_5_0_5b_hotpotqa_100/RESULTS.md).
 
+## Completed scale replication
+
+On 2026-08-25, the prospectively frozen Qwen2.5-1.5B condition completed all 500 generations on the exact ordered pilot sample. EAR@K was 22% (95% CI 14%–30%) and persistent EAR was 13% (7%–20%). Versus 0.5B, paired differences were −1 point for EAR@K (−11 to +10) and +1 point for persistent EAR (−8 to +10). Only 8 reversal questions were shared across sizes (Jaccard 0.216). The manifest records that public GitHub transport occurred after the run rather than claiming an independently public pre-run timestamp.
+
+The [1.5B result card](../results/replication_qwen2_5_1_5b_hotpotqa_100/RESULTS.md), [paired comparison](../results/comparison_qwen2_5_0_5b_vs_1_5b_hotpotqa_100/RESULTS.md), raw trajectories, exact-match sensitivity, plots, audit, and hashes are committed artifacts.
+
 ## Next empirical milestone
 
-The immediate next condition is the [preregistered Qwen2.5-1.5B scale replication](QWEN_1_5B_REPLICATION.md). It reuses the exact pilot sample and protocol to estimate paired model-size differences without tuning on the new outputs.
-
-After that diagnostic replication, run the pre-registered primary matrix with at least two open-weight model families and two retrievers on 500–1000 questions per condition. Neither the single small-model pilot nor the within-family scale replication can support broad RAG reliability claims.
+Add a second open-weight model family under the same 100-question diagnostic protocol, then add a second retriever before scaling to the 500–1000-question primary matrix. Neither the pilot nor this within-family scale replication supports broad RAG reliability claims.
