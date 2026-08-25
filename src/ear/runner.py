@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import time
 from pathlib import Path
 
 from .backends import Backend, make_backend
@@ -69,13 +70,29 @@ def load_examples(path: str, limit: int | None = None) -> list[Example]:
 
 
 def run(args: argparse.Namespace) -> None:
-    backend = make_backend(args.backend, args.model, args.temperature, args.base_url)
+    backend = make_backend(
+        args.backend,
+        args.model,
+        args.temperature,
+        args.base_url,
+        context_size=getattr(args, "context_size", 4096),
+        threads=getattr(args, "threads", None),
+        batch_size=getattr(args, "batch_size", 512),
+        seed=getattr(args, "seed", 7),
+        max_tokens=getattr(args, "max_tokens", 32),
+    )
     gate = build_gate(args, backend)
     gate_mode = getattr(args, "gate", "none")
     depths = parse_depths(args.depths)
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     examples = load_examples(args.input, args.limit)
+    run_metadata = {
+        **backend.metadata(),
+        "depths": depths,
+        "scoring": args.scoring,
+        "gate_mode": gate_mode,
+    }
 
     with output.open("w", encoding="utf-8") as writer:
         for index, example in enumerate(examples, 1):
@@ -84,14 +101,20 @@ def run(args: argparse.Namespace) -> None:
             for depth in depths:
                 effective_depth = min(depth, len(example.passages))
                 passages = example.passages[:effective_depth]
+                started = time.perf_counter()
                 raw_answer = backend.answer(example.question, passages)
+                generation_latency_ms = (time.perf_counter() - started) * 1000
                 step: dict[str, object] = {
                     "k": depth,
                     "effective_k": effective_depth,
                     "answer": raw_answer,
                     "correct": correctness(raw_answer, example.answers, args.scoring),
                     "f1": best_f1(raw_answer, example.answers),
+                    "generation_latency_ms": generation_latency_ms,
                 }
+                usage = getattr(backend, "last_usage", None)
+                if isinstance(usage, dict):
+                    step["generation_usage"] = usage
 
                 if gate is not None:
                     application = gate.apply(
@@ -125,6 +148,7 @@ def run(args: argparse.Namespace) -> None:
                 "question": example.question,
                 "answers": example.answers,
                 "gate_mode": gate_mode,
+                "run_metadata": run_metadata,
                 "trajectory": trajectory,
             }
             writer.write(json.dumps(record, ensure_ascii=False) + "\n")
@@ -136,9 +160,16 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", required=True)
     parser.add_argument("--output", required=True)
-    parser.add_argument("--backend", choices=["mock", "openai"], default="mock")
+    parser.add_argument(
+        "--backend", choices=["mock", "openai", "llama-cpp"], default="mock"
+    )
     parser.add_argument("--model")
     parser.add_argument("--base-url", default="https://api.openai.com/v1")
+    parser.add_argument("--context-size", type=int, default=4096)
+    parser.add_argument("--threads", type=int)
+    parser.add_argument("--batch-size", type=int, default=512)
+    parser.add_argument("--seed", type=int, default=7)
+    parser.add_argument("--max-tokens", type=int, default=32)
     parser.add_argument("--depths", default="1,2,3,5,10")
     parser.add_argument("--limit", type=int)
     parser.add_argument("--temperature", type=float, default=0.0)

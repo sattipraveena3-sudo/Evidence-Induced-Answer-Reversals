@@ -1,7 +1,11 @@
 __pycache__/
 *.pyc
+*.egg-info/
+build/
 .venv/
 .env
 results/*
 !results/.gitkeep
+!results/pilot_qwen2_5_0_5b_hotpotqa_100/
+!results/pilot_qwen2_5_0_5b_hotpotqa_100/**
 data/primary.jsonl

@@ -12,11 +12,13 @@ dependencies = []
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
 plots = ["matplotlib>=3.8"]
+local = ["llama-cpp-python==0.3.35"]
 
 [project.scripts]
 ear-run = "ear.runner:main"
 ear-analyze = "ear.analysis:main"
 ear-prepare = "ear.prepare:main"
+ear-rescore = "ear.rescore:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

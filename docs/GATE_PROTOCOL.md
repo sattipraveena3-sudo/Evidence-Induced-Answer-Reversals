@@ -81,7 +81,7 @@ Use paired question-level bootstrap confidence intervals for raw-versus-gated di
 - **H3:** Change-triggering invokes the verifier on a minority of depth transitions, reducing overhead relative to verification at every depth.
 - **H4:** The model verifier improves the harm/repair/coverage trade-off over the deterministic lexical baseline.
 
-All four hypotheses remain unconfirmed until real-model outputs exist.
+The 100-question Qwen2.5-0.5B pilot is consistent with H1 only in the narrow sense that answered harmful transitions fell; the simultaneous 55% final coverage prevents an effectiveness claim. The lexical baseline retained 41.2% of repairs, did not satisfy the intended H2 trade-off, and triggered on 59.25% of transitions, so H3 was not supported in this condition. H4 was not tested. All hypotheses remain unconfirmed pending the primary matrix.
 
 ## Execution stages
 

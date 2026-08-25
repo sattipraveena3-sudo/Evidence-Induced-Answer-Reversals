@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "status": "completed_real_model_exploratory_pilot",
+  "completed_at_utc": "2026-08-25T10:05:50Z",
+  "dataset": {
+    "name": "HotpotQA",
+    "configuration": "distractor development",
+    "license": "CC BY-SA 4.0",
+    "official_url": "http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_dev_distractor_v1.json",
+    "mirror_repository": "namlh2004/hotpotqa",
+    "mirror_revision": "7e54db4656209750ff487f6fdf8e39a66dba136b",
+    "source_sha256": "e3da074df24e8369009918aa5cdbdd254dadcde4c63f7569d36afd6f2268caa8",
+    "source_rows": 7405,
+    "sample_rows": 100,
+    "sample_seed": 7,
+    "prepared_sample_sha256": "915d6b5706981b0f76e13bd56e3b81f8e09d11be09fd44ad1aa405aadb99f424"
+  },
+  "retrieval": {
+    "ranking": "deterministic lexical-overlap baseline",
+    "depths": [1, 2, 3, 5, 10],
+    "fixed_prefixes": true
+  },
+  "generator": {
+    "repository": "Qwen/Qwen2.5-0.5B-Instruct-GGUF",
+    "repository_revision": "9217f5db79a29953eb74d5343926648285ec7e67",
+    "file": "qwen2.5-0.5b-instruct-q4_k_m.gguf",
+    "quantization": "Q4_K_M",
+    "model_sha256": "74a4da8c9fdbcd15bd1f6d01d621410d31c6fc00986f5eb687824e7b93d7a9db",
+    "runtime": "llama-cpp-python==0.3.35",
+    "temperature": 0.0,
+    "seed": 7,
+    "context_size": 4096,
+    "batch_size": 512,
+    "threads": 9,
+    "max_new_tokens": 32,
+    "generation_calls": 500,
+    "prompt_tokens": 336528,
+    "completion_tokens": 3323,
+    "wall_time_seconds": 1098.33
+  },
+  "scoring": {
+    "binary": "normalized contiguous whole-token answer containment",
+    "continuous": "normalized token F1",
+    "bootstrap_resamples": 3000,
+    "bootstrap_seed": 7
+  },
+  "gate": {
+    "mode": "lexical",
+    "support_threshold": 0.8,
+    "margin": 0.2,
+    "gold_labels_visible": false
+  },
+  "exact_match_sensitivity": {
+    "accuracy_by_depth": [0.20, 0.17, 0.19, 0.26, 0.29],
+    "ear_at_k": 0.19,
+    "ear_at_k_bootstrap_95_ci": [0.12, 0.27],
+    "persistent_ear": 0.10,
+    "persistent_ear_bootstrap_95_ci": [0.05, 0.16]
+  },
+  "environment": {
+    "python": "3.12.13",
+    "compute": "CPU only",
+    "cpu": "Intel Xeon Platinum 8370C"
+  },
+  "integrity": {
+    "answer_content_sha256": "64dcde902b296b30521f2b82b57b01e8ebe3a60e000a55db867bc6b7ef6a330a",
+    "trajectories_sha256": "30ab57ed3490c069504227f938963ac6b2a649af0d9502381a17ebbdf15840a3",
+    "summary_sha256": "7a364db1275a4e5388c42fe21aba9a0640da9bab11a3acea76864c75d21636db",
+    "gate_summary_sha256": "ad2d4517a1abc2ac59ddd8f46c003f3c0e9637578208f391f61c59d2b5f54ede",
+    "reversal_examples_sha256": "89949d405be26e9610b632a088fe80ae4c23845cbe43df896510c2af6c99f0e0"
+  },
+  "limitations": [
+    "Exploratory pilot, not the pre-registered primary experiment",
+    "One small quantized model family",
+    "One lexical ranking condition",
+    "Low absolute QA performance",
+    "One hundred questions and wide uncertainty intervals"
+  ]
+}

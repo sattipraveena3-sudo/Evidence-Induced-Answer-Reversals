@@ -13,7 +13,7 @@ The first stage of the repository measures answer trajectories. The planned seco
 - [Pre-registered gate protocol](docs/GATE_PROTOCOL.md)
 - [Current experiment status](docs/experiment_status.md)
 
-**Research status:** the trajectory pipeline and first change-triggered gate implementation are verified by unit tests and a mock smoke workflow. The primary real-model experiment is still pending. Mock outputs are never research findings.
+**Research status:** a completed 100-question, 500-generation open-weight pilot now provides the first real-model evidence. It found harmful answer reversals and exposed a severe coverage/repair trade-off in the lexical gate. This is an exploratory single-model pilot, not the multi-model primary experiment or a paper-level conclusion. Mock outputs are never research findings. See the [pilot result card](results/pilot_qwen2_5_0_5b_hotpotqa_100/RESULTS.md).
 
 ## Core metrics
 
@@ -36,7 +36,7 @@ This is why aggregate Top-k accuracy can hide substantial harmful reversals.
 src/ear/
   schema.py       Data validation and normalization
   scoring.py      Exact-match and token-F1 scoring
-  backends.py     Mock and OpenAI-compatible model backends
+  backends.py     Mock, local GGUF, and OpenAI-compatible model backends
   gate.py         Change detection, lexical baseline, and model verifier
   runner.py       Generate Top-k answer trajectories
   analysis.py     Compute raw and selective-gate metrics + bootstrap CIs
@@ -71,7 +71,20 @@ ear-analyze \
 
 The mock backend is **only for testing the pipeline**. Its numbers must never be used as research findings.
 
-## 2. Real experiment with an OpenAI-compatible endpoint
+## 2. Free real-model CPU pilot
+
+Install the local inference extra, then run the frozen 100-question HotpotQA pilot:
+
+```bash
+python -m pip install -e '.[local]'
+scripts/run_free_pilot.sh
+```
+
+The script downloads the official Qwen2.5-0.5B-Instruct Q4_K_M GGUF file, verifies its SHA-256 digest, prepares the deterministic HotpotQA sample, generates five-depth trajectories, applies the lexical gate, and writes the analysis outputs. No API key or paid service is required. The published pilot used 9 CPU threads and took 18 minutes 18 seconds for 500 generations.
+
+The committed [manifest](results/pilot_qwen2_5_0_5b_hotpotqa_100/manifest.json), derived tables, and raw trajectories make the pilot auditable. The model weights and full dataset are not committed.
+
+## 3. Real experiment with an OpenAI-compatible endpoint
 
 Set credentials locally:
 
@@ -136,6 +149,8 @@ Two verifier modes are implemented:
 
 Neither verifier receives the reference answer or correctness label. Gate analysis reports incorrect-answer transitions and correct-to-abstain transitions separately, alongside BCR retention, coverage, selective accuracy, call rate, and latency. This prevents abstention from being misreported as a free reliability improvement. See the [gate protocol](docs/GATE_PROTOCOL.md).
 
+The default `contains` correctness rule means normalized **whole-token-sequence** containment, not arbitrary string-substring matching. For example, the answer `no` does not match `unknown`. Token F1 is always reported alongside the binary trajectory labels.
+
 ## Publication protocol
 
 Recommended primary run:
@@ -164,9 +179,10 @@ Recent work already studies retrieval-size robustness, correct/wrong transitions
 - `gate_depth_metrics.csv` — coverage and selective accuracy at each depth
 - `gate_transitions.csv` — raw EAR/BCR versus gated harm, repair, and abstention
 - `gate_decisions.csv` — initial, unchanged, accept, retain, and abstain counts
+- `manifest.json` — dataset, model, runtime, scoring, and artifact hashes
 
 If matplotlib is installed, `ear-analyze --plots` also writes publication-ready PNG figures.
 
 ## Result requirement
 
-This repository is considered complete only when a real primary experiment has been run. Publishable claims must come from `ear-analyze` outputs generated from real model trajectories, not the mock backend.
+The exploratory pilot establishes feasibility and a first falsifiable signal; it does not make the repository publication-complete. Publishable claims require the pre-registered multi-model, multi-retriever primary experiment and must come from real model trajectories, never the mock backend.
