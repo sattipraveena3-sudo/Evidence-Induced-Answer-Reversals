@@ -7,6 +7,8 @@ replication_model_url="https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/re
 replication_model_sha="6a1a2eb6d15622bf3c96857206351ba97e1af16c30d7a74ee38970e434e9407e"
 replication_input="${EAR_REPLICATION_INPUT:-/tmp/ear-hotpotqa-100.jsonl}"
 replication_results="${EAR_RESULTS_DIR:-results/replication_qwen2_5_1_5b_hotpotqa_100}"
+baseline_trajectories="${EAR_BASELINE_TRAJECTORIES:-results/pilot_qwen2_5_0_5b_hotpotqa_100/trajectories.jsonl}"
+comparison_results="${EAR_COMPARISON_DIR:-results/comparison_qwen2_5_0_5b_vs_1_5b_hotpotqa_100}"
 replication_threads="${EAR_THREADS:-9}"
 expected_input_sha="915d6b5706981b0f76e13bd56e3b81f8e09d11be09fd44ad1aa405aadb99f424"
 
@@ -38,3 +40,27 @@ ear-run \
 ear-analyze \
   --input "${replication_results}/trajectories.jsonl" \
   --outdir "${replication_results}"
+
+ear-compare \
+  --baseline "${baseline_trajectories}" \
+  --candidate "${replication_results}/trajectories.jsonl" \
+  --outdir "${comparison_results}" \
+  --baseline-label "Qwen2.5-0.5B-Instruct-Q4_K_M" \
+  --candidate-label "Qwen2.5-1.5B-Instruct-Q4_K_M"
+
+baseline_exact="/tmp/ear-qwen2.5-0.5b-hotpotqa-100-exact.jsonl"
+replication_exact="/tmp/ear-qwen2.5-1.5b-hotpotqa-100-exact.jsonl"
+ear-rescore --input "${baseline_trajectories}" --output "${baseline_exact}" --scoring exact
+ear-rescore \
+  --input "${replication_results}/trajectories.jsonl" \
+  --output "${replication_exact}" \
+  --scoring exact
+ear-analyze \
+  --input "${replication_exact}" \
+  --outdir "${replication_results}/exact_match_sensitivity"
+ear-compare \
+  --baseline "${baseline_exact}" \
+  --candidate "${replication_exact}" \
+  --outdir "${comparison_results}/exact_match_sensitivity" \
+  --baseline-label "Qwen2.5-0.5B-Instruct-Q4_K_M" \
+  --candidate-label "Qwen2.5-1.5B-Instruct-Q4_K_M"

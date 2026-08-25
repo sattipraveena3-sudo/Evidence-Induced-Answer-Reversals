@@ -23,5 +23,10 @@ jobs:
             --depths 1,2,3,5 \
             --gate lexical
           ear-analyze --input /tmp/mock_trajectories.jsonl --outdir /tmp/mock_results
+          ear-compare \
+            --baseline /tmp/mock_trajectories.jsonl \
+            --candidate /tmp/mock_trajectories.jsonl \
+            --outdir /tmp/mock_comparison
           test -f /tmp/mock_results/summary.json
           test -f /tmp/mock_results/gate_summary.json
+          test -f /tmp/mock_comparison/comparison.json

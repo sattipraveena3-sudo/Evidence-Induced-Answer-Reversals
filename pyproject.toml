@@ -17,6 +17,7 @@ local = ["llama-cpp-python==0.3.35"]
 [project.scripts]
 ear-run = "ear.runner:main"
 ear-analyze = "ear.analysis:main"
+ear-compare = "ear.compare:main"
 ear-prepare = "ear.prepare:main"
 ear-rescore = "ear.rescore:main"
 

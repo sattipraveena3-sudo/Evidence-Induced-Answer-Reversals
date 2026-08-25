@@ -41,6 +41,7 @@ src/ear/
   gate.py         Change detection, lexical baseline, and model verifier
   runner.py       Generate Top-k answer trajectories
   analysis.py     Compute raw and selective-gate metrics + bootstrap CIs
+  compare.py      Paired comparison of matched trajectory conditions
   prepare.py      Dataset conversion utilities
 scripts/
   run_smoke_test.sh
@@ -114,6 +115,19 @@ ear-analyze \
   --outdir results/primary
 ```
 
+For two conditions run on the identical questions and depths:
+
+```bash
+ear-compare \
+  --baseline results/baseline/trajectories.jsonl \
+  --candidate results/candidate/trajectories.jsonl \
+  --outdir results/comparison \
+  --baseline-label baseline \
+  --candidate-label candidate
+```
+
+The comparison command enforces identical ordered IDs, questions, answers, and retrieval depths, then reports paired question-level bootstrap intervals. Adjacent-transition aggregates resample whole trajectories so the four transitions from one question are not treated as independent.
+
 ## Input format
 
 Each JSONL line:
@@ -181,6 +195,8 @@ Recent work already studies retrieval-size robustness, correct/wrong transitions
 - `gate_transitions.csv` — raw EAR/BCR versus gated harm, repair, and abstention
 - `gate_decisions.csv` — initial, unchanged, accept, retain, and abstain counts
 - `manifest.json` — dataset, model, runtime, scoring, and artifact hashes
+- `comparison.json` / `comparison.csv` — paired condition differences and intervals
+- `reversal_set_membership.csv` — shared and condition-specific reversal IDs
 
 If matplotlib is installed, `ear-analyze --plots` also writes publication-ready PNG figures.
 
