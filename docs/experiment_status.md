@@ -22,4 +22,6 @@ The raw trajectories, result tables, hashes, and limitations are in the [pilot r
 
 ## Next empirical milestone
 
-Run the pre-registered primary matrix with at least two open-weight model families and two retrievers on 500–1000 questions per condition. The single small-model pilot is not a confirmatory result and cannot support broad RAG reliability claims.
+The immediate next condition is the [preregistered Qwen2.5-1.5B scale replication](QWEN_1_5B_REPLICATION.md). It reuses the exact pilot sample and protocol to estimate paired model-size differences without tuning on the new outputs.
+
+After that diagnostic replication, run the pre-registered primary matrix with at least two open-weight model families and two retrievers on 500–1000 questions per condition. Neither the single small-model pilot nor the within-family scale replication can support broad RAG reliability claims.

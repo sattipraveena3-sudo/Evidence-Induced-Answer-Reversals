@@ -11,6 +11,7 @@ The first stage of the repository measures answer trajectories. The planned seco
 - [Research identity and scope](docs/RESEARCH_IDENTITY.md)
 - [27-paper literature map](docs/LITERATURE_MAP.md)
 - [Pre-registered gate protocol](docs/GATE_PROTOCOL.md)
+- [Pre-registered Qwen2.5-1.5B scale replication](docs/QWEN_1_5B_REPLICATION.md)
 - [Current experiment status](docs/experiment_status.md)
 
 **Research status:** a completed 100-question, 500-generation open-weight pilot now provides the first real-model evidence. It found harmful answer reversals and exposed a severe coverage/repair trade-off in the lexical gate. This is an exploratory single-model pilot, not the multi-model primary experiment or a paper-level conclusion. Mock outputs are never research findings. See the [pilot result card](results/pilot_qwen2_5_0_5b_hotpotqa_100/RESULTS.md).

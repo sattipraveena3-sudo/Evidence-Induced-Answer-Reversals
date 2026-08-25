@@ -1,0 +1,71 @@
+{
+  "study_id": "qwen2_5_1_5b_hotpotqa_100_scale_replication",
+  "status": "preregistered_before_generation",
+  "preregistered_at_utc": "2026-08-25T20:06:33Z",
+  "parent_condition": "pilot_qwen2_5_0_5b_hotpotqa_100",
+  "purpose": "Model-scale replication within Qwen2.5; this is not an independent model-family replication.",
+  "dataset": {
+    "name": "HotpotQA",
+    "configuration": "distractor development",
+    "sample_rows": 100,
+    "sample_seed": 7,
+    "prepared_sample_sha256": "915d6b5706981b0f76e13bd56e3b81f8e09d11be09fd44ad1aa405aadb99f424"
+  },
+  "retrieval": {
+    "ranking": "deterministic lexical-overlap baseline",
+    "depths": [1, 2, 3, 5, 10],
+    "fixed_prefixes": true
+  },
+  "generator": {
+    "repository": "Qwen/Qwen2.5-1.5B-Instruct-GGUF",
+    "repository_revision": "91cad51170dc346986eccefdc2dd33a9da36ead9",
+    "file": "qwen2.5-1.5b-instruct-q4_k_m.gguf",
+    "quantization": "Q4_K_M",
+    "model_sha256": "6a1a2eb6d15622bf3c96857206351ba97e1af16c30d7a74ee38970e434e9407e",
+    "runtime": "llama-cpp-python==0.3.35",
+    "temperature": 0.0,
+    "seed": 7,
+    "context_size": 4096,
+    "batch_size": 512,
+    "threads": 9,
+    "max_new_tokens": 32
+  },
+  "scoring": {
+    "primary_binary": "normalized contiguous whole-token answer containment",
+    "continuous": "normalized token F1",
+    "sensitivity_binary": "normalized exact match",
+    "bootstrap_resamples": 3000,
+    "bootstrap_seed": 7,
+    "bootstrap_unit": "question"
+  },
+  "gate": {
+    "mode": "lexical",
+    "support_threshold": 0.8,
+    "margin": 0.2,
+    "gold_labels_visible": false
+  },
+  "primary_endpoints": ["EAR@K", "P-EAR", "median FRD"],
+  "secondary_endpoints": [
+    "accuracy by depth",
+    "token F1 by depth",
+    "adjacent-depth EAR",
+    "adjacent-depth BCR",
+    "RTB"
+  ],
+  "paired_comparisons": [
+    "1.5B minus 0.5B accuracy at each depth with paired bootstrap intervals",
+    "1.5B minus 0.5B EAR@K and P-EAR with paired bootstrap intervals",
+    "discordant question counts and Jaccard overlap for any-reversal sets",
+    "question-clustered difference in adjacent-transition EAR and BCR"
+  ],
+  "hypotheses": {
+    "primary": "At least one harmful correct-to-incorrect transition occurs in the 1.5B condition.",
+    "comparative": "Differences from the 0.5B condition are estimated two-sided; no direction is preregistered."
+  },
+  "exclusions": [
+    "No question is excluded based on its answer or effect on a metric.",
+    "A run may be replaced only for a documented technical failure, corrupted artifact, or protocol mismatch.",
+    "All 100 IDs must exactly match the published pilot and appear in the same order."
+  ],
+  "success_criterion": "A complete, hash-verified 500-generation run and paired analysis, regardless of whether the hypothesis is supported."
+}
