@@ -1,6 +1,18 @@
 # Evidence-Induced Answer Reversals in Retrieval-Augmented Generation
 
-A reproducible research implementation for measuring **Evidence-Induced Answer Reversals (EAR)**: cases where a RAG system answers correctly with a smaller retrieved context and becomes incorrect after more evidence is added.
+A reproducible research program for measuring and mitigating **Evidence-Induced Answer Reversals (EAR)**: cases where a RAG system answers correctly with a smaller retrieved context and becomes incorrect after more evidence is added.
+
+## Frozen research question
+
+> When retrieved evidence is expanded along a fixed ranking, which answer changes are harmful, why do they persist or recover, and can a change-triggered evidence-stability gate reduce correct-to-incorrect transitions without suppressing incorrect-to-correct repairs?
+
+The first stage of the repository measures answer trajectories. The planned second stage adds a verifier that runs only when an answer changes, then accepts the new answer, retains the earlier answer, or abstains based on comparative evidence support.
+
+- [Research identity and scope](docs/RESEARCH_IDENTITY.md)
+- [27-paper literature map](docs/LITERATURE_MAP.md)
+- [Current experiment status](docs/experiment_status.md)
+
+**Research status:** the software pipeline and mock smoke test are verified; the primary real-model experiment and mitigation study are still pending. Mock outputs are never research findings.
 
 ## Core metrics
 
@@ -115,6 +127,10 @@ Recommended primary run:
 - bootstrap 95% confidence intervals
 - retain all C→W examples for qualitative analysis
 - never report mock or synthetic numbers as empirical findings
+
+## Closest prior work and novelty boundary
+
+Recent work already studies retrieval-size robustness, correct/wrong transitions under grounding perturbations, sufficient-context abstention, conflict handling, and adaptive retrieval. This project therefore does **not** claim that answer instability alone is new. Its testable contribution is the combined study of fixed-ranking adjacent-depth trajectories, persistence/recovery, and a change-triggered evidence gate that reduces EAR while retaining BCR. See the [literature map](docs/LITERATURE_MAP.md) for the required comparisons.
 
 ## Generated outputs
 
