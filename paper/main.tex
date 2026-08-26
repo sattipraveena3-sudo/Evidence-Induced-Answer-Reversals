@@ -1,0 +1,278 @@
+\documentclass[10pt,twocolumn]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{mathptmx}
+\usepackage[margin=0.72in,columnsep=0.24in]{geometry}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage{balance}
+\usepackage{url}
+\usepackage{hyperref}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=black,
+  urlcolor=blue!55!black,
+  pdftitle={When More Retrieved Evidence Makes Answers Worse},
+  pdfauthor={Praveena Satti}
+}
+\urlstyle{same}
+\graphicspath{{paper/figures/}}
+\setlist[itemize]{leftmargin=*,topsep=2pt,itemsep=1pt,parsep=0pt}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\floatsep}{7pt plus 2pt minus 2pt}
+\setlength{\intextsep}{7pt plus 2pt minus 2pt}
+\setlength{\emergencystretch}{1.5em}
+
+\newcommand{\EAR}{\mathrm{EAR}}
+\newcommand{\BCR}{\mathrm{BCR}}
+\newcommand{\RTB}{\mathrm{RTB}}
+\newcommand{\pear}{\mathrm{P\text{-}EAR}}
+\newcommand{\qsmall}{Qwen2.5-0.5B}
+\newcommand{\qlarge}{Qwen2.5-1.5B}
+\newcommand{\smol}{SmolLM2-1.7B}
+
+\title{\textbf{When More Retrieved Evidence Makes Answers Worse:}\\
+A Reproducible Study of Evidence-Induced Answer Reversals}
+\author{Praveena Satti\\
+\small Independent Researcher, Hyderabad, India\\
+\small \texttt{sattipraveena3@gmail.com}}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Retrieval-augmented generation is usually summarized with one accuracy score at one retrieval depth. That summary misses a practically important failure: a system may answer correctly with a small evidence set, then become wrong when more passages are added. We call this an \emph{evidence-induced answer reversal} (EAR). We follow 100 HotpotQA distractor-development questions through fixed, nested evidence prefixes at depths 1, 2, 3, 5, and 10. Three CPU-runnable open-weight conditions---\qsmall, \qlarge, and \smol---produce 1,500 deterministic generations in total. At least one correct-to-incorrect transition occurs for 23\%, 22\%, and 32\% of questions, respectively; 12\%, 13\%, and 21\% remain unrecovered at the final depth. Aggregate accuracy alone hides these movements because harmful reversals and beneficial corrections coexist. A transparent, gold-label-free lexical gate reduces answered harmful transitions by 91--97\%, but final coverage falls to 52--61\%, only 29--41\% of beneficial corrections are retained, and population-level correct-answer rates decline. We therefore report the gate as a negative diagnostic baseline, not a successful mitigation. Exact-match sensitivity, a manual audit, raw trajectories, manifests, and a publicly timestamped independent-family replication make the scope and failure modes inspectable. The study is deliberately small: it establishes a reproducible trajectory diagnostic and a bounded workshop-level result, not a universal claim about RAG systems.
+\end{abstract}
+
+\section{Introduction}
+
+Retrieval-augmented generation (RAG) gives a language model external evidence before it answers \citep{lewis2020rag}. A common expectation follows naturally: if one useful passage helps, adding more highly ranked passages should help further, or at least do no harm. In practice, a longer retrieved context can introduce a plausible distractor, a conflicting statement, or enough clutter to change how the model uses evidence. The final Top-$k$ accuracy may still rise because some wrong answers are repaired at the same time that other correct answers are lost.
+
+This paper studies that hidden movement. For one question, let the evidence at depth $k_a$ be an exact prefix of the evidence at $k_b>k_a$. An \emph{evidence-induced answer reversal} is a transition from a correct answer at $k_a$ to an incorrect answer at $k_b$. We also count the opposite transition---a beneficial correction---because preventing every change would trivially remove reversals while blocking genuine repairs. The central research question is:
+
+\begin{quote}
+\small
+When retrieved evidence is expanded along a fixed ranking, which answer changes are harmful, why do they persist or recover, and can a change-triggered evidence-stability gate reduce correct-to-incorrect transitions without suppressing incorrect-to-correct repairs?
+\end{quote}
+
+The study makes three bounded contributions. First, it treats each answer as a trajectory over adjacent retrieval depths and jointly reports harmful transitions, beneficial corrections, persistence, recovery, and first-reversal depth. Second, it applies the same questions, ranking, prompt, decoding, scoring, and analysis to three small open models spanning two families. Third, it tests a transparent change-triggered gate and reports the cost that an EAR-only metric would hide: abstention, coverage, and lost repairs. All runs are free to reproduce on CPU; raw outputs and integrity hashes are public.\footnote{\href{https://github.com/sattipraveena3-sudo/Evidence-Induced-Answer-Reversals}{Public repository and artifacts}.}
+
+The contribution is intentionally narrower than ``more context can hurt.'' Prior work already establishes context distraction, retrieval-size sensitivity, and correct/wrong transitions. Our addition is a reproducible fixed-ranking trajectory package and an explicit harm--repair--coverage accounting. This distinction matters both scientifically and for honest evaluation.
+
+\section{Related Work and Positioning}
+
+\paragraph{RAG foundations.}
+RAG combines a parametric generator with external retrieval \citep{lewis2020rag}. REALM learns latent retrieval during pretraining \citep{guu2020realm}, dense passage retrieval improves open-domain passage recall \citep{karpukhin2020dpr}, and Fusion-in-Decoder shows that generative readers can benefit from aggregating many passages \citep{izacard2021fid}. In-context retrieval augmentation also works with an otherwise unchanged language model \citep{ram2023incontext}, which is closest to our black-box prompting setup. These results motivate more evidence, but average gains do not imply monotonic behavior for each question.
+
+\paragraph{Noise, position, and conflict.}
+Long-context models often use information differently depending on its position \citep{liu2024lost}. Irrelevant or semantically related distractors can substantially change reasoning and answers \citep{shi2023distracted,wu2024irrelevant}, while filtering and robust training can reduce some retrieval-induced failures \citep{yoran2024robust}. Passage relevance, count, and position interact in non-obvious ways \citep{cuconasu2024noise}, and broad RAG benchmarks expose weaknesses in noise robustness, rejection, integration, and counterfactual reasoning \citep{chen2024rgb}. Real retrieved contexts also vary in reliability, sufficiency, difficulty, and stance in ways that synthetic noise does not fully capture \citep{hagstrom2025reality}. Work on conflicting evidence further shows weak synthesis and sensitivity to presentation order or repetition \citep{wang2025conflicting,naphade2026rational}.
+
+Two recent papers define the closest novelty boundary. \citet{cao2025robustness} study no-degradation, retrieval-size, and retrieval-order robustness across 1,500 questions and 11 models. \citet{yang2025spurious} measure correct/wrong transitions under spurious features in grounding data. We do not relabel either result as new. Instead, we hold one ranking fixed, examine every adjacent depth, separate temporary from persistent harm, track beneficial repair, and test a change-triggered gate under the same accounting.
+
+\paragraph{Evaluation and selective answering.}
+RAGAs and ARES provide component-level automated evaluation \citep{es2024ragas,saadfalcon2024ares}; RAGTruth supplies fine-grained human hallucination annotations \citep{niu2024ragtruth}. Sufficient-context prediction and unanswerability evaluation show why accuracy must be reported with answer coverage \citep{joren2025sufficient,peng2025unanswerability}. A very recent preprint likewise reports that misleading context remains difficult and verifier gains can trade against correct-answer coverage \citep{setiawan2026abstention}. We therefore treat abstention as an outcome with a cost, never as an automatically correct decision.
+
+\paragraph{Mitigation and adaptive retrieval.}
+Self-RAG learns retrieval and critique through reflection tokens \citep{asai2024selfrag}; RECOMP compresses or omits retrieved context \citep{xu2024recomp}; CRAG evaluates retrieval and launches corrective actions \citep{yan2024crag}. Adaptive-RAG routes questions by complexity \citep{jeong2024adaptive}, Astute RAG consolidates imperfect and conflicting knowledge \citep{wang2025astute}, Stop-RAG learns when to stop iterative retrieval \citep{park2025stoprag}, and InstructRAG trains explicit denoising behavior \citep{wei2024instructrag}. These are stronger mitigation families than our lexical baseline. Our purpose is to establish a minimal diagnostic that exposes the necessary trade-offs before a learned gate is claimed to improve reliability.
+
+\section{Trajectory Formulation}
+
+For question $i$ and retrieval depth $k$, let $z_i(k)\in\{0,1\}$ indicate whether the generated answer is correct. For adjacent depths $a<b$, we define
+\begin{align}
+\EAR(a,b) &= \frac{1}{N}\sum_{i=1}^{N} z_i(a)\,[1-z_i(b)],\\
+\BCR(a,b) &= \frac{1}{N}\sum_{i=1}^{N} [1-z_i(a)]\,z_i(b),\\
+\RTB(a,b) &= \BCR(a,b)-\EAR(a,b).
+\end{align}
+Here BCR is the beneficial correction rate and RTB is the retrieval transition balance. By direct expansion,
+\begin{equation}
+\mathrm{Acc}(b)-\mathrm{Acc}(a)=\BCR(a,b)-\EAR(a,b).
+\label{eq:identity}
+\end{equation}
+Equation~\ref{eq:identity} explains why a positive aggregate accuracy change does not rule out harmful reversals.
+
+Across all measured depths, EAR@K is the fraction of questions with at least one adjacent correct-to-incorrect transition. Persistent EAR (P-EAR) counts questions with a reversal and no later correct answer. First reversal depth (FRD) is the earliest destination depth of a reversal. We also classify full binary trajectories as persistent failure, stable correct, beneficial recovery, temporary reversal, harmful reversal, or oscillation. These labels summarize behavior; the transition rates remain the primary auditable quantities.
+
+\section{Experimental Design}
+
+\subsection{Data and a frozen nested ranking}
+
+We use 100 examples from the HotpotQA distractor-development split \citep{yang2018hotpotqa}. A Python \texttt{Random(7)} shuffle is applied to all 7,405 development examples, after which the first 100 are selected. Each example contains a question, its answer, and ten candidate paragraphs. The prepared sample has SHA-256 digest \texttt{915d6b57...f424}.
+
+We deliberately use a transparent lexical ranking rather than present it as a competitive retriever. Text is tokenized with \texttt{[a-z0-9]+}. For paragraph $j$, title-token matches receive weight three, question--document multiset overlap receives weight one, and $0.001(m-j)$ deterministically breaks ties in original order. We sort once, then pass exact prefixes at $k\in\{1,2,3,5,10\}$. Thus Top-5 always contains the complete Top-3 context plus two paragraphs; no reranking confound is introduced between depths.
+
+\subsection{Models, prompting, and study phases}
+
+We evaluate Qwen2.5-Instruct at 0.5B and 1.5B parameters \citep{qwen2025technical} and SmolLM2-Instruct at 1.7B \citep{allal2025smollm2}. Each uses the official Q4\_K\_M GGUF artifact with its revision and SHA-256 hash recorded in a manifest. Inference uses \texttt{llama-cpp-python==0.3.35}, a 4,096-token context, batch size 512, nine CPU threads, at most 32 new tokens, temperature 0, and seed 7.
+
+The system prompt is: ``Answer only from the supplied evidence. Return only a short factual answer. If the evidence is insufficient, return unknown.'' The user message contains the question and numbered evidence passages. We produce five answers for every model--question pair, for 500 generations per condition and 1,500 overall.
+
+The phases must not be conflated. The 0.5B run is exploratory. The 1.5B protocol was frozen locally as a within-family scale replication, but its GitHub publication happened after generation; it is not claimed as an independently public preregistration. The SmolLM2 protocol was publicly frozen on the main branch in commit \texttt{f757d862...} before any of its 500 generations began, with no protocol deviation.
+
+\subsection{Scoring and uncertainty}
+
+The primary binary score lowercases text, removes punctuation and articles, collapses whitespace, and checks whether a normalized gold answer appears as a contiguous whole-token sequence in the prediction. Token F1 is continuous support, and normalized exact match is a sensitivity analysis. Containment accommodates short answers with harmless elaboration but can accept an answer embedded in incorrect extra text; Section~\ref{sec:audit} reports the resulting audit rather than hiding it.
+
+All confidence intervals use 3,000 nonparametric bootstrap resamples with seed 7. A question is the unit of resampling. Paired model comparisons resample aligned questions, and adjacent-transition aggregates resample whole five-depth trajectories, not 400 transitions as if independent. Intervals are descriptive uncertainty estimates for this fixed 100-question sample; we do not apply multiple-testing corrections or promote isolated intervals into general family claims.
+
+\subsection{Change-triggered lexical gate}
+
+The gate stores the last non-abstained answer as a stable anchor. If a new normalized answer is unchanged, no verification occurs. On change, a gold-label-free verifier computes the strongest within-passage lexical support for the anchor and candidate. It accepts a candidate only when support is at least 0.8 and exceeds anchor support by at least 0.2; it retains the anchor under the symmetric condition; otherwise it abstains. An abstention leaves the stable anchor available for later recovery.
+
+We report raw EAR, harmful answered transitions after gating, correct-to-abstain events, BCR retention, final coverage, population-level correct-answer rate, selective accuracy among answered questions, and calls per example. This prevents a gate that simply refuses to answer from looking successful.
+
+\section{Results}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{main_results.png}
+  \caption{Matched trajectories and lexical-gate outcomes. (a) Accuracy is non-monotonic as a fixed evidence prefix grows. (b) Every condition has both temporary and persistent reversals. (c) The gate sharply lowers harmful \emph{answered} transitions. (d) That apparent gain is coupled to abstention: coverage and population-level correct-answer rates reveal the cost. All percentages are calculated from committed result JSON files.}
+  \label{fig:main}
+\end{figure*}
+
+\subsection{Aggregate accuracy hides bidirectional change}
+
+Figure~\ref{fig:main}a shows three different aggregate patterns. \qsmall{} rises from 23\% accuracy at $k=1$ to 32\% at $k=10$, and \qlarge{} rises from 22\% to 40\%. \smol{}, however, peaks at 30\% at $k=2$ and falls to 18\% at $k=10$. None of the trajectories is monotonic across all measured depths.
+
+More importantly, a positive endpoint change does not mean individual questions were protected. EAR@K is 23\% (95\% CI 15--32) for \qsmall{}, 22\% (14--30) for \qlarge{}, and 32\% (23--41) for \smol{}. Persistent EAR is 12\% (6--19), 13\% (7--20), and 21\% (13--30), respectively. Median first reversal depth is 3 for \qsmall{} and 5 for both larger conditions.
+
+\begin{table}[t]
+\centering
+\caption{Adjacent transition rates. Each cell is EAR/BCR in percentage points; the last column averages the four transitions while retaining the question trajectory as the uncertainty unit.}
+\label{tab:transitions}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lccccc}
+\toprule
+Condition & $1{\to}2$ & $2{\to}3$ & $3{\to}5$ & $5{\to}10$ & Mean \\
+\midrule
+\qsmall & 9/8 & 4/9 & 5/5 & 7/12 & 6.25/8.50 \\
+\qlarge & 4/18 & 5/6 & 10/5 & 4/12 & 5.75/10.25 \\
+\smol   & 5/10 & 9/3 & 7/7 & 15/9 & 9.00/7.25 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+Table~\ref{tab:transitions} exposes both directions of change. For example, the \qlarge{} $k=1\to2$ accuracy gain is driven by 18\% beneficial corrections against 4\% reversals. Its $k=3\to5$ decline reverses that balance: EAR is 10\% and BCR is 5\%. Every transition satisfies Equation~\ref{eq:identity} exactly.
+
+\subsection{Cross-condition differences are localized}
+
+The primary paired family comparison is \smol{} minus size-near \qlarge{}. EAR@K is 10 points higher (95\% CI $-1$ to $+21$), and P-EAR is 8 points higher ($-2$ to $+18$). Those intervals are too imprecise for a general model-family conclusion. The prespecified deep transition is clearer: from $k=5$ to $k=10$, SmolLM2 EAR is 15\% versus 4\%, a paired difference of $+11$ points ($+5$ to $+18$). Only 11 questions reverse in both conditions; the reversal-set Jaccard overlap is 0.256. This localization suggests that model-level averages alone are an incomplete description of retrieval sensitivity.
+
+Within Qwen, moving from 0.5B to 1.5B does not measurably remove reversals. The paired EAR@K difference is $-1$ point ($-11$ to $+10$), P-EAR differs by $+1$ point ($-8$ to $+10$), and only eight reversal questions are shared (Jaccard 0.216). Scaling this one model family improves some depth-specific accuracy values, but the present sample does not support a claim that scale solves EAR.
+
+\subsection{The lexical gate is a negative baseline}
+
+\begin{table*}[t]
+\centering
+\caption{Gate trade-offs. Raw and gated harm are averaged over adjacent transitions. Population accuracy counts abstentions as unanswered; selective accuracy conditions on coverage. A lower harmful answered-transition rate is not, by itself, a reliability improvement.}
+\label{tab:gate}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Condition & Raw EAR & Gated harm & Relative drop & BCR retained & Coverage & Raw Acc.@10 & Pop. Acc.@10 & Selective Acc. \\
+\midrule
+\qsmall & 6.25\% & 0.25\% & 96.0\% & 41.2\% & 55\% & 32\% & 22\% & 40.0\% \\
+\qlarge & 5.75\% & 0.50\% & 91.3\% & 29.3\% & 61\% & 40\% & 22\% & 36.1\% \\
+\smol   & 9.00\% & 0.25\% & 97.2\% & 41.4\% & 52\% & 18\% & 17\% & 32.7\% \\
+\bottomrule
+\end{tabular}}
+\end{table*}
+
+Table~\ref{tab:gate} shows why an EAR-only evaluation is unsafe. The gate reduces harmful answered transitions by 91--97\%, but retains only 29--41\% of raw beneficial corrections. At the final depth, it answers only 52--61\% of questions. Selective accuracy among those answers is 33--40\%, yet the population-level correct-answer rate is lower than raw accuracy in every condition: 32\% to 22\%, 40\% to 22\%, and 18\% to 17\%. The verifier is called 2.37, 2.15, and 2.35 times per question for \qsmall{}, \qlarge{}, and \smol{}, respectively.
+
+The lexical gate therefore demonstrates that suppressing answer change is easy; preserving useful change is hard. We report it as a failed mitigation and a useful diagnostic baseline. A stronger verifier should be compared against this full vector of outcomes, not only against gated harm.
+
+\subsection{Audit and concrete trajectories}
+\label{sec:audit}
+
+\begin{table*}[t]
+\centering
+\caption{Two selected SmolLM2 trajectories; presentation-only quotation marks are omitted. T/F marks the primary containment correctness label. Each later context is a strict expansion of the earlier one.}
+\label{tab:examples}
+\small
+\begin{tabular}{@{}p{0.30\textwidth}p{0.10\textwidth}p{0.34\textwidth}p{0.19\textwidth}@{}}
+\toprule
+Question & Gold answer & Answers at $k=1,2,3,5,10$ & Pattern \\
+\midrule
+Which genus is native to arid or semi-desert areas, Alopecurus or Echeveria? & Echeveria & Echeveria (T), Echeveria (T), Echeveria (T), Alopecurus (F), Alopecurus (F) & Persistent reversal after added evidence. \\
+\addlinespace
+The Very Best of Ugly Kid Joe: As Ugly as It Gets includes a cover of which Black Sabbath song from their 1970 debut? & N.I.B. & N.I.B. (T), N.I.B. (T), N.I.B. (T), Behind the Wall of Sleep (F), N.I.B. (T) & Temporary reversal followed by recovery. \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+Exact-match rescoring preserves the qualitative signal while lowering absolute counts. Exact-match EAR@K/P-EAR is 19\%/10\% for \qsmall{}, 17\%/11\% for \qlarge{}, and 25\%/18\% for \smol{}, compared with 23\%/12\%, 22\%/13\%, and 32\%/21\% under containment.
+
+For the publicly preregistered SmolLM2 condition, all saved correctness labels recompute with zero mismatches. We manually reviewed every distinct output that was positive only under containment and every one of the 32 reversal trajectories. Of 14 containment-only output forms across 11 questions, ten were valid expansions, three were clear false positives spanning two questions, and one mixed a direct answer with incorrect extra detail. Thirty of 32 reversal trajectories had an unambiguously correct pre-reversal answer; 27 had a clearly incorrect later answer. Six trajectories were scoring-sensitive in some respect. This single-reviewer, non-blinded audit cannot replace independent annotation, but it identifies where the metric is brittle and confirms that the signal is not solely a string-matching artifact.
+
+Table~\ref{tab:examples} illustrates why a trajectory view is useful. The first question would appear simply wrong at Top-10 even though the model was correct through Top-3. The second would appear correct at both endpoints, hiding a harmful middle transition and later recovery.
+
+\section{Discussion}
+
+\paragraph{What the study establishes.}
+Across three matched small-model conditions, adding ranked evidence can both repair and damage answers. The phenomenon survives a stricter scoring rule, a model-size change within Qwen, and a publicly preregistered switch to SmolLM2. The strongest comparative result is local rather than global: SmolLM2 has a higher reversal rate than Qwen1.5B specifically at $k=5\to10$. The low overlap between reversal sets also shows that one headline prevalence number does not identify which questions are vulnerable.
+
+\paragraph{What the study does not establish.}
+It does not show that SmolLM2 is generally less robust, that lexical retrieval causes every reversal, or that EAR prevalence transfers to larger proprietary models. It does not provide a successful gate. Because model family, tokenizer, training data, parameter count, and quantization differ together, the cross-family comparison is descriptive rather than causal. The work is best read as an empirical diagnostic and work-in-progress foundation for a larger study.
+
+\paragraph{A better mitigation target.}
+A gate should optimize more than reversal suppression. One practical objective is to minimize harmful answered transitions subject to explicit lower bounds on BCR retention and coverage, with population accuracy reported alongside selective accuracy. Evidence sufficiency, contradiction, source reliability, and answer entailment are likely stronger signals than lexical overlap alone. They should be evaluated on the same frozen trajectories first, then in a prospective multi-retriever run.
+
+\section{Limitations}
+
+The main limitations are deliberate and substantial:
+\begin{itemize}
+  \item The sample contains only 100 HotpotQA distractor-development questions. Bootstrap intervals describe sampling uncertainty but do not repair limited domain coverage.
+  \item There is one deterministic lexical ranking over provided candidate paragraphs, not a full-corpus neural retriever. Retrieval method and passage order are not varied.
+  \item The evaluated models are small, instruction-tuned, and Q4\_K\_M-quantized. Absolute QA accuracy is low, and conclusions may change with larger models.
+  \item The two families are not matched on tokenizer, training, scale, or quantization effects. Cross-family differences cannot be assigned to family identity.
+  \item Containment scoring has known false positives; exact match has known false negatives. The manual audit used one non-blinded reviewer.
+  \item Only the SmolLM2 condition was independently and publicly timestamped before generation. The Qwen phases remain exploratory or locally frozen replications.
+  \item No second dataset, second retriever, causal mechanism intervention, or validated learned verifier is included. These are requirements for stronger prevalence or mitigation claims.
+\end{itemize}
+
+\section{Ethics and Reproducibility}
+
+The study uses a public QA benchmark and open-weight models; it introduces no participants, personal data, or high-stakes deployment. HotpotQA is attributed to its creators, and the manifest records the dataset source and license. The reliability language in this paper should not be interpreted as evidence that the tested models or gate are safe for medical, legal, financial, or other consequential decisions.
+
+The repository includes code, configs, exact prompts, raw five-depth trajectories, all reversal examples, result tables, paired comparisons, gate decisions, model and dataset revisions, artifact hashes, and tests. The 1,500 generations can be reproduced without a paid API on CPU, although downloading the open model weights and dataset is required. The manuscript figure is regenerated directly from committed JSON summaries with \texttt{python paper/build\_figures.py}. The complete 30-paper literature matrix records each source's setting, intervention, finding, limitation, and role in this project.
+
+\section{Conclusion}
+
+More retrieved evidence is not automatically safer evidence. On the same 100 questions, three small open models show harmful reversals, useful repairs, temporary failures, and persistent failures as one fixed evidence prefix grows. Aggregate accuracy compresses those events into a number that cannot show who was helped and who was harmed. A simple lexical gate nearly eliminates harmful answered transitions, but does so by abstaining often and discarding most beneficial corrections. That negative result sharpens the next step: evaluate richer evidence-aware verifiers under joint harm, repair, coverage, and population-accuracy constraints, across more datasets and retrievers. The present contribution is the transparent diagnostic and the evidence needed to build that larger study responsibly.
+
+\section*{Artifact Status}
+
+This is a venue-neutral, workshop-style research manuscript prepared from completed experiments. It has not been peer reviewed, accepted, or published. Before submission, the author should select a specific venue, apply its official template and anonymity policy, refresh the literature search, and add the planned second-retriever condition if the venue expects confirmatory claims.
+
+\balance
+\bibliographystyle{plainnat}
+\bibliography{paper/references}
+
+\appendix
+\section{Reproduction Snapshot}
+
+The core analysis can be reproduced from the committed trajectories without regenerating model answers:
+\begin{verbatim}
+ear-analyze --input <trajectories.jsonl> \
+  --outdir <analysis-directory>
+\end{verbatim}
+For a fresh condition, the repository scripts pin the sample, model revision, model hash, prompt, runtime, decoding, gate, and output locations. Mock-backend numbers are explicitly excluded from research claims.
+
+\section{Primary Trajectory Taxonomy}
+
+Across the 100 questions, \qsmall{} has 54 persistent failures, 10 stable-correct trajectories, 13 beneficial recoveries, 17 temporary reversals, 3 harmful reversals, and 3 oscillations. The corresponding counts are 46, 11, 21, 15, 4, and 3 for \qlarge{}, and 57, 7, 4, 17, 9, and 6 for \smol{}. These mutually exclusive whole-trajectory labels sum to 100 in every condition; they supplement rather than replace adjacent EAR and BCR.
+
+\end{document}

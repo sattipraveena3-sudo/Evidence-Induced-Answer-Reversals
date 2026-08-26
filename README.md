@@ -9,13 +9,15 @@ A reproducible research program for measuring and mitigating **Evidence-Induced 
 The first stage of the repository measures answer trajectories. The planned second stage adds a verifier that runs only when an answer changes, then accepts the new answer, retains the earlier answer, or abstains based on comparative evidence support.
 
 - [Research identity and scope](docs/RESEARCH_IDENTITY.md)
-- [27-paper literature map](docs/LITERATURE_MAP.md)
+- [30-paper literature map](docs/LITERATURE_MAP.md)
+- [Complete workshop-style manuscript and literature matrix](paper/README.md)
+- [Rendered manuscript PDF](output/pdf/Evidence_Induced_Answer_Reversals_Praveena_Satti.pdf)
 - [Pre-registered gate protocol](docs/GATE_PROTOCOL.md)
 - [Pre-registered Qwen2.5-1.5B scale replication](docs/QWEN_1_5B_REPLICATION.md)
 - [Pre-registered SmolLM2-1.7B independent-family replication](docs/SMOLLM2_1_7B_FAMILY_REPLICATION.md)
 - [Current experiment status](docs/experiment_status.md)
 
-**Research status:** three completed matched conditions now provide 1,500 genuine open-weight generations across Qwen2.5 and SmolLM2. All three find harmful reversals. The publicly preregistered SmolLM2 condition has EAR@K 32% (23%–41%); its overall difference from size-near Qwen1.5B remains imprecise, but its k=5→10 EAR is 11 points higher (+5 to +18). The lexical gate still loses too much coverage and too many repairs. These are strong cross-family diagnostics, not yet the multi-retriever primary experiment or a paper-level conclusion. See the [SmolLM2 result card](results/replication_smollm2_1_7b_hotpotqa_100/RESULTS.md) and [primary cross-family comparison](results/comparison_qwen2_5_1_5b_vs_smollm2_1_7b_hotpotqa_100/RESULTS.md).
+**Research status:** three completed matched conditions now provide 1,500 genuine open-weight generations across Qwen2.5 and SmolLM2. All three find harmful reversals. The publicly preregistered SmolLM2 condition has EAR@K 32% (23%–41%); its overall difference from size-near Qwen1.5B remains imprecise, but its k=5→10 EAR is 11 points higher (+5 to +18). The lexical gate still loses too much coverage and too many repairs. The current diagnostic manuscript package is complete and auditable; it is a workshop-style draft, not yet a peer-reviewed publication or the planned multi-retriever confirmatory study. See the [paper package](paper/README.md), [SmolLM2 result card](results/replication_smollm2_1_7b_hotpotqa_100/RESULTS.md), and [primary cross-family comparison](results/comparison_qwen2_5_1_5b_vs_smollm2_1_7b_hotpotqa_100/RESULTS.md).
 
 ## Core metrics
 
