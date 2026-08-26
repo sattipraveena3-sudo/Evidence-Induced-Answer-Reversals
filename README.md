@@ -12,9 +12,10 @@ The first stage of the repository measures answer trajectories. The planned seco
 - [27-paper literature map](docs/LITERATURE_MAP.md)
 - [Pre-registered gate protocol](docs/GATE_PROTOCOL.md)
 - [Pre-registered Qwen2.5-1.5B scale replication](docs/QWEN_1_5B_REPLICATION.md)
+- [Pre-registered SmolLM2-1.7B independent-family replication](docs/SMOLLM2_1_7B_FAMILY_REPLICATION.md)
 - [Current experiment status](docs/experiment_status.md)
 
-**Research status:** the completed 0.5B pilot and prospectively frozen 1.5B scale replication provide 1,000 real open-weight generations on matched questions. Both found harmful answer reversals; paired intervals do not show that scale reduced their incidence, and the lexical gate retains too few useful repairs. These are exploratory conditions within one model family, not the multi-family primary experiment or a paper-level conclusion. Mock outputs are never research findings. See the [1.5B result card](results/replication_qwen2_5_1_5b_hotpotqa_100/RESULTS.md) and [paired comparison](results/comparison_qwen2_5_0_5b_vs_1_5b_hotpotqa_100/RESULTS.md).
+**Research status:** the completed 0.5B pilot and 1.5B scale replication provide 1,000 real open-weight generations on matched questions. Both found harmful answer reversals; paired intervals do not show that scale reduced their incidence, and the lexical gate retains too few useful repairs. A prospectively frozen SmolLM2 1.7B condition is the next independent-family diagnostic. These remain exploratory conditions, not the multi-retriever primary experiment or a paper-level conclusion. Mock outputs are never research findings. See the [1.5B result card](results/replication_qwen2_5_1_5b_hotpotqa_100/RESULTS.md) and [paired comparison](results/comparison_qwen2_5_0_5b_vs_1_5b_hotpotqa_100/RESULTS.md).
 
 ## Core metrics
 

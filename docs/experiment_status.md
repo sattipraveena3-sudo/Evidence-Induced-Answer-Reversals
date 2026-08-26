@@ -26,6 +26,12 @@ On 2026-08-25, the prospectively frozen Qwen2.5-1.5B condition completed all 500
 
 The [1.5B result card](../results/replication_qwen2_5_1_5b_hotpotqa_100/RESULTS.md), [paired comparison](../results/comparison_qwen2_5_0_5b_vs_1_5b_hotpotqa_100/RESULTS.md), raw trajectories, exact-match sensitivity, plots, audit, and hashes are committed artifacts.
 
-## Next empirical milestone
+## Prospectively frozen independent-family replication
 
-Add a second open-weight model family under the same 100-question diagnostic protocol, then add a second retriever before scaling to the 500–1000-question primary matrix. Neither the pilot nor this within-family scale replication supports broad RAG reliability claims.
+The SmolLM2 1.7B condition is frozen before generation on the exact ordered 100-question sample, lexical ranking, nested depths, prompt, decoding, scoring, and gate used by both Qwen2.5 conditions. Qwen2.5 1.5B is the primary size-near paired comparator and Qwen2.5 0.5B is secondary. The complete protocol is in the [SmolLM2 preregistration](SMOLLM2_1_7B_FAMILY_REPLICATION.md).
+
+No SmolLM2 answers had been generated or inspected at the freeze time. Generation may begin only after the freeze commit is verified publicly on `main`.
+
+## Next milestone after SmolLM2
+
+Add a second retriever before scaling to the 500–1000-question primary matrix. The current diagnostic conditions do not support broad RAG reliability claims.
