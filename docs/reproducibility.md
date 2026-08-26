@@ -26,3 +26,14 @@ Run `python -m pip install -e '.[local]'` followed by `scripts/run_free_pilot.sh
 - Raw-trajectory SHA-256: `6ddbaaa180291cf4b767e167e02879cf8736019a53f75924e944bbd488a91086`.
 
 Run `python -m pip install -e '.[local,plots]'` followed by `scripts/run_qwen_1_5b_replication.sh`. Exact metadata, execution notes, audit counts, and artifact hashes are in the [replication manifest](../results/replication_qwen2_5_1_5b_hotpotqa_100/manifest.json).
+
+## Published SmolLM2 1.7B independent-family replication
+
+- Independently public pre-generation commit: `f757d862e59f5fd25b70a5463f0ec639e0c07888`; tree `90744d2f52cecaf693d8ee455fd4f2ba2e67db5d`.
+- Dataset, order, ranking, prompts, depths, decoding, scoring, gate, and bootstrap settings are identical to both Qwen conditions.
+- Generator: `HuggingFaceTB/SmolLM2-1.7B-Instruct-GGUF` pinned file revision `6a7e79393ef2957e087f11fce1e50476799e313c`, file `smollm2-1.7b-instruct-q4_k_m.gguf`.
+- Model SHA-256: `decd2598bc2c8ed08c19adc3c8fdd461ee19ed5708679d1c54ef54a5a30d4f33`.
+- Runtime: `llama-cpp-python==0.3.35`, context 4096, batch 512, 9 CPU threads, seed 7, maximum 32 new tokens.
+- Raw-trajectory SHA-256: `8b4712f32c7ea0add400bc1eb3e72165741816a4e680e47ec6690fc0a46f09b5`.
+
+Run `python -m pip install -e '.[local,plots]'` followed by `scripts/run_smollm2_1_7b_replication.sh`. Exact metadata, execution notes, audit counts, comparison hashes, and limitations are in the [replication manifest](../results/replication_smollm2_1_7b_hotpotqa_100/manifest.json).

@@ -1,0 +1,8 @@
+metric,k_or_transition,value,ci_low,ci_high
+accuracy,1,0.25,0.17,0.34
+accuracy,2,0.3,0.21,0.4
+accuracy,3,0.24,0.16,0.33
+accuracy,5,0.24,0.16,0.32
+accuracy,10,0.18,0.11,0.25
+EAR@K,10,0.32,0.23,0.41
+P-EAR,10,0.21,0.13,0.3

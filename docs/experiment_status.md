@@ -8,7 +8,7 @@
 - Gold-label-free deterministic lexical verifier baseline
 - Fixed-JSON model-verifier interface for OpenAI-compatible local or hosted endpoints
 - Gate analysis that reports harmful answered transitions separately from abstentions
-- Twelve passing unit tests and a deterministic end-to-end gate smoke run
+- Fifteen passing unit tests and a deterministic end-to-end gate smoke run
 - Local GGUF backend with model hashing, token usage, and per-generation latency
 - Whole-token containment scoring with a regression test preventing `no` from matching `unknown`
 
@@ -26,12 +26,14 @@ On 2026-08-25, the prospectively frozen Qwen2.5-1.5B condition completed all 500
 
 The [1.5B result card](../results/replication_qwen2_5_1_5b_hotpotqa_100/RESULTS.md), [paired comparison](../results/comparison_qwen2_5_0_5b_vs_1_5b_hotpotqa_100/RESULTS.md), raw trajectories, exact-match sensitivity, plots, audit, and hashes are committed artifacts.
 
-## Prospectively frozen independent-family replication
+## Completed independent-family replication
 
-The SmolLM2 1.7B condition is frozen before generation on the exact ordered 100-question sample, lexical ranking, nested depths, prompt, decoding, scoring, and gate used by both Qwen2.5 conditions. Qwen2.5 1.5B is the primary size-near paired comparator and Qwen2.5 0.5B is secondary. The complete protocol is in the [SmolLM2 preregistration](SMOLLM2_1_7B_FAMILY_REPLICATION.md).
+On 2026-08-26, SmolLM2 1.7B completed all 500 generations after the frozen condition was publicly timestamped in GitHub commit `f757d862…`. It used the exact ordered 100-question sample, ranking, nested depths, prompt, decoding, scoring, and gate from both Qwen2.5 conditions.
 
-No SmolLM2 answers had been generated or inspected at the freeze time. Generation may begin only after the freeze commit is verified publicly on `main`.
+EAR@K was 32% (95% CI 23%–41%), persistent EAR was 21% (13%–30%), and exact-match EAR@K was 25% (17%–34%). Versus size-near Qwen1.5B, the overall EAR@K difference was +10 points (−1 to +21), while the prespecified k=5→10 transition showed a clearer +11-point EAR difference (+5 to +18). Only 11 reversal questions were shared (Jaccard 0.256).
+
+The [result card](../results/replication_smollm2_1_7b_hotpotqa_100/RESULTS.md), [primary paired comparison](../results/comparison_qwen2_5_1_5b_vs_smollm2_1_7b_hotpotqa_100/RESULTS.md), [scoring audit](../results/replication_smollm2_1_7b_hotpotqa_100/SCORING_AUDIT.md), raw trajectories, plots, and manifest are committed artifacts.
 
 ## Next milestone after SmolLM2
 
-Add a second retriever before scaling to the 500–1000-question primary matrix. The current diagnostic conditions do not support broad RAG reliability claims.
+Preregister and run a second retriever while holding the sample and one model fixed, then scale to the 500–1000-question primary matrix. The current diagnostic conditions do not support broad prevalence or mitigation claims.

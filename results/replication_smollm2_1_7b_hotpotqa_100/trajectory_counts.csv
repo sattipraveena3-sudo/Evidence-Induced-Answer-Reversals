@@ -1,0 +1,7 @@
+trajectory_type,count
+beneficial_recovery,4
+harmful_reversal,9
+oscillation,6
+persistent_failure,57
+stable_correct,7
+temporary_reversal,17

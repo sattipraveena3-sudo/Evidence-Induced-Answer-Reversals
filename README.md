@@ -15,7 +15,7 @@ The first stage of the repository measures answer trajectories. The planned seco
 - [Pre-registered SmolLM2-1.7B independent-family replication](docs/SMOLLM2_1_7B_FAMILY_REPLICATION.md)
 - [Current experiment status](docs/experiment_status.md)
 
-**Research status:** the completed 0.5B pilot and 1.5B scale replication provide 1,000 real open-weight generations on matched questions. Both found harmful answer reversals; paired intervals do not show that scale reduced their incidence, and the lexical gate retains too few useful repairs. A prospectively frozen SmolLM2 1.7B condition is the next independent-family diagnostic. These remain exploratory conditions, not the multi-retriever primary experiment or a paper-level conclusion. Mock outputs are never research findings. See the [1.5B result card](results/replication_qwen2_5_1_5b_hotpotqa_100/RESULTS.md) and [paired comparison](results/comparison_qwen2_5_0_5b_vs_1_5b_hotpotqa_100/RESULTS.md).
+**Research status:** three completed matched conditions now provide 1,500 genuine open-weight generations across Qwen2.5 and SmolLM2. All three find harmful reversals. The publicly preregistered SmolLM2 condition has EAR@K 32% (23%–41%); its overall difference from size-near Qwen1.5B remains imprecise, but its k=5→10 EAR is 11 points higher (+5 to +18). The lexical gate still loses too much coverage and too many repairs. These are strong cross-family diagnostics, not yet the multi-retriever primary experiment or a paper-level conclusion. See the [SmolLM2 result card](results/replication_smollm2_1_7b_hotpotqa_100/RESULTS.md) and [primary cross-family comparison](results/comparison_qwen2_5_1_5b_vs_smollm2_1_7b_hotpotqa_100/RESULTS.md).
 
 ## Core metrics
 
@@ -87,7 +87,18 @@ The script downloads the official Qwen2.5-0.5B-Instruct Q4_K_M GGUF file, verifi
 
 The committed [manifest](results/pilot_qwen2_5_0_5b_hotpotqa_100/manifest.json), derived tables, and raw trajectories make the pilot auditable. The model weights and full dataset are not committed.
 
-## 3. Real experiment with an OpenAI-compatible endpoint
+## 3. Independent-family CPU replication
+
+Install the local and plotting extras, then run the frozen SmolLM2 condition:
+
+```bash
+python -m pip install -e '.[local,plots]'
+scripts/run_smollm2_1_7b_replication.sh
+```
+
+The script verifies the official pinned SmolLM2 1.7B Q4_K_M model, reproduces the exact sample, generates 500 trajectories, and creates primary/secondary paired and exact-match analyses. The committed [result card](results/replication_smollm2_1_7b_hotpotqa_100/RESULTS.md), [scoring audit](results/replication_smollm2_1_7b_hotpotqa_100/SCORING_AUDIT.md), and [manifest](results/replication_smollm2_1_7b_hotpotqa_100/manifest.json) expose raw outputs, uncertainty, trade-offs, provenance, and known scoring failures.
+
+## 4. Real experiment with an OpenAI-compatible endpoint
 
 Set credentials locally:
 
@@ -203,4 +214,4 @@ If matplotlib is installed, `ear-analyze --plots` also writes publication-ready 
 
 ## Result requirement
 
-The exploratory pilot establishes feasibility and a first falsifiable signal; it does not make the repository publication-complete. Publishable claims require the pre-registered multi-model, multi-retriever primary experiment and must come from real model trajectories, never the mock backend.
+The three diagnostic conditions establish feasibility and cross-family signal reproducibility; they do not make the repository publication-complete. Publishable prevalence and mitigation claims require the preregistered second-retriever condition and larger multi-model, multi-retriever primary matrix. All empirical claims must come from real model trajectories, never the mock backend.

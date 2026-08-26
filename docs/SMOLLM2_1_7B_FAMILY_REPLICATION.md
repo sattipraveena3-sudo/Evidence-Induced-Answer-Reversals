@@ -47,3 +47,5 @@ No prompt, threshold, scoring rule, sample, comparator, or depth may be changed 
 ## Publication provenance
 
 The public GitHub commit containing this file and the machine-readable contract is the independent pre-generation timestamp. Its SHA will be recorded in the completed result manifest. Model download and environment validation may occur before or after publication, but no SmolLM2 answer generation may begin until that public commit is verified on `main`.
+
+The freeze was published and verified on `main` as commit `f757d862e59f5fd25b70a5463f0ec639e0c07888` with tree `90744d2f52cecaf693d8ee455fd4f2ba2e67db5d` before generation. The completed run preserves that provenance in its [manifest](../results/replication_smollm2_1_7b_hotpotqa_100/manifest.json).

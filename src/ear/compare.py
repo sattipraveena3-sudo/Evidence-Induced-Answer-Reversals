@@ -339,7 +339,7 @@ def make_plots(result: dict, outdir: Path) -> None:
     plt.plot(depths, candidate, marker="o", label=result["candidate_label"])
     plt.xlabel("Retrieval depth k")
     plt.ylabel("Accuracy")
-    plt.title("Paired accuracy by model scale")
+    plt.title("Paired accuracy by condition")
     plt.xticks(depths)
     plt.ylim(0, 1)
     plt.grid(axis="y", alpha=0.25)

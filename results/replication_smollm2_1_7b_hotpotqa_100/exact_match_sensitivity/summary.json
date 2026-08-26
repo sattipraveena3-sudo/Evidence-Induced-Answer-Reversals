@@ -1,0 +1,129 @@
+{
+  "n": 100,
+  "depths": [
+    1,
+    2,
+    3,
+    5,
+    10
+  ],
+  "accuracy": [
+    {
+      "k": 1,
+      "accuracy": 0.21,
+      "ci_low": 0.13,
+      "ci_high": 0.29
+    },
+    {
+      "k": 2,
+      "accuracy": 0.27,
+      "ci_low": 0.18,
+      "ci_high": 0.36
+    },
+    {
+      "k": 3,
+      "accuracy": 0.21,
+      "ci_low": 0.13,
+      "ci_high": 0.29
+    },
+    {
+      "k": 5,
+      "accuracy": 0.2,
+      "ci_low": 0.12,
+      "ci_high": 0.28
+    },
+    {
+      "k": 10,
+      "accuracy": 0.14,
+      "ci_low": 0.08,
+      "ci_high": 0.21
+    }
+  ],
+  "f1": [
+    {
+      "k": 1,
+      "f1": 0.2624302986016541
+    },
+    {
+      "k": 2,
+      "f1": 0.32841251493604434
+    },
+    {
+      "k": 3,
+      "f1": 0.2685184049397604
+    },
+    {
+      "k": 5,
+      "f1": 0.2572145698859254
+    },
+    {
+      "k": 10,
+      "f1": 0.20096721144352725
+    }
+  ],
+  "transitions": [
+    {
+      "from_k": 1,
+      "to_k": 2,
+      "ear": 0.03,
+      "ear_ci_low": 0.0,
+      "ear_ci_high": 0.07,
+      "bcr": 0.09,
+      "bcr_ci_low": 0.04,
+      "bcr_ci_high": 0.15,
+      "rtb": 0.06
+    },
+    {
+      "from_k": 2,
+      "to_k": 3,
+      "ear": 0.08,
+      "ear_ci_low": 0.03,
+      "ear_ci_high": 0.14,
+      "bcr": 0.02,
+      "bcr_ci_low": 0.0,
+      "bcr_ci_high": 0.05,
+      "rtb": -0.06
+    },
+    {
+      "from_k": 3,
+      "to_k": 5,
+      "ear": 0.05,
+      "ear_ci_low": 0.01,
+      "ear_ci_high": 0.1,
+      "bcr": 0.04,
+      "bcr_ci_low": 0.01,
+      "bcr_ci_high": 0.08,
+      "rtb": -0.010000000000000002
+    },
+    {
+      "from_k": 5,
+      "to_k": 10,
+      "ear": 0.11,
+      "ear_ci_low": 0.05,
+      "ear_ci_high": 0.17,
+      "bcr": 0.05,
+      "bcr_ci_low": 0.01,
+      "bcr_ci_high": 0.1,
+      "rtb": -0.06
+    }
+  ],
+  "ear_at_k": 0.25,
+  "ear_at_k_ci": [
+    0.17,
+    0.34
+  ],
+  "p_ear": 0.18,
+  "p_ear_ci": [
+    0.11,
+    0.26
+  ],
+  "median_frd": 5,
+  "trajectory_counts": {
+    "persistent_failure": 66,
+    "oscillation": 3,
+    "temporary_reversal": 14,
+    "beneficial_recovery": 2,
+    "stable_correct": 7,
+    "harmful_reversal": 8
+  }
+}
